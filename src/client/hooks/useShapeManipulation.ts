@@ -60,7 +60,6 @@ export const useShapeManipulation = () => {
 
   const handleMouseMove = (
     e: React.MouseEvent,
-    shapes: Shape[],
     setShapes: React.Dispatch<React.SetStateAction<Shape[]>>
   ): void => {
     if (resizing) {

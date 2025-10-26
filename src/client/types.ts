@@ -1,5 +1,5 @@
 // Types
-interface Shape {
+export interface Shape {
   id: string;
   shape: string;
   xPercent: number;
@@ -8,14 +8,9 @@ interface Shape {
   rotation: number;
 }
 
-interface Challenge {
-  id: string;
-  shapes: Omit<Shape, 'id'>[];
-  answer: string;
-  name: string;
-}
 
-interface Offset {
+
+export interface Offset {
   x: number;
   y: number;
   initialSize?: number;
@@ -25,5 +20,5 @@ interface Offset {
   startAngle?: number;
 }
 
-type View = 'menu' | 'create' | 'play';
-type HandleType = 'move' | 'resize' | 'rotate';
+export type View = 'menu' | 'create' | 'challenge' | 'leaderboard';
+export type HandleType = 'move' | 'resize' | 'rotate';

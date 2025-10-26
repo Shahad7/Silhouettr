@@ -11,7 +11,7 @@ interface CanvasProps {
   onMouseUp?: () => void;
   onMouseDown?: (e: React.MouseEvent, shapeId: string, handleType?: HandleType) => void;
   onShapeDelete?: (shapeId: string) => void;
-  canvasRef?: React.RefObject<HTMLDivElement>;
+  canvasRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 export const Canvas: React.FC<CanvasProps> = ({

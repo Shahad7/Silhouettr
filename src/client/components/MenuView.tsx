@@ -1,12 +1,16 @@
 import React from 'react';
 
 interface MenuViewProps {
-  challenges: Challenge[];
   onCreateClick: () => void;
   onPlayClick: () => void;
+  onLeaderboardClick?: () => void;
 }
 
-export const MenuView: React.FC<MenuViewProps> = ({ challenges, onCreateClick, onPlayClick }) => {
+export const MenuView: React.FC<MenuViewProps> = ({ 
+  onCreateClick, 
+  onPlayClick, 
+  onLeaderboardClick 
+}) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-purple-400 to-blue-500 p-4">
       <div className="bg-white rounded-3xl shadow-2xl p-12 max-w-md w-full">
@@ -20,18 +24,26 @@ export const MenuView: React.FC<MenuViewProps> = ({ challenges, onCreateClick, o
           >
             🎨 Create Challenge
           </button>
-          <button
-            onClick={onPlayClick}
-            className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-4 px-6 rounded-xl text-xl font-semibold hover:shadow-lg transform hover:scale-105 transition"
-          >
-            🎮 Play Challenge
-          </button>
+          {onPlayClick && (
+            <button
+              onClick={onPlayClick}
+              className="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white py-4 px-6 rounded-xl text-xl font-semibold hover:shadow-lg transform hover:scale-105 transition"
+            >
+              🎯 Play Challenge
+            </button>
+          )}
+          {onLeaderboardClick && (
+            <button
+              onClick={onLeaderboardClick}
+              className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-4 px-6 rounded-xl text-xl font-semibold hover:shadow-lg transform hover:scale-105 transition"
+            >
+              🏆 View Leaderboard
+            </button>
+          )}
         </div>
-        {challenges && challenges.length > 0 && (
-          <p className="text-center mt-6 text-gray-600">
-            {challenges.length} challenge{challenges.length !== 1 ? 's' : ''} saved
-          </p>
-        )}
+        <p className="text-center mt-6 text-gray-600">
+          🎮 Reddit Challenge Mode
+        </p>
       </div>
     </div>
   );

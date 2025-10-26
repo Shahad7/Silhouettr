@@ -1,30 +1,71 @@
-# 🎯 Silhouettr
+# 🎯 Shape Guess Challenge
 
-An innovative visual puzzle game built on Reddit's Devvit platform where creativity meets challenge. Players become both artists and puzzle solvers, creating intricate visual riddles using Unicode shapes and challenging others to decode their artistic arrangements.
+An innovative visual puzzle game built on Reddit's Devvit platform where creativity meets challenge. Players become both artists and puzzle solvers, creating intricate visual riddles using Unicode shapes and challenging others to decode their artistic arrangements through Reddit's integrated gaming experience.
 
-## What is Silhouettr?
+## What is Shape Guess Challenge?
 
-Silhouettr is a dual-mode creative puzzle game that transforms simple Unicode symbols into engaging visual brain teasers. Using a palette of 10 carefully selected black geometric shapes (●, ▮, ▲, ★, ♦, ▼, ◆, ⬛, ⬤, ▪), players craft recognizable objects, patterns, scenes, or abstract concepts on a responsive digital canvas.
+Shape Guess Challenge is a comprehensive puzzle game that transforms simple Unicode symbols into engaging visual brain teasers. Using a palette of 10 carefully selected black geometric shapes (●, ▮, ▲, ★, ♦, ▼, ◆, ⬛, ⬤, ▪), players craft recognizable objects, patterns, scenes, or abstract concepts on a responsive digital canvas.
 
-The game features two complementary gameplay modes:
+The game features three integrated gameplay modes that create a complete creative and competitive ecosystem:
 
 ### 🎨 **Create Mode** - Become the Puzzle Master
 Design custom visual challenges using a professional-grade shape manipulation system:
-- **Advanced Canvas Editor**: Drag-and-drop positioning with pixel-perfect precision
+- **Advanced Canvas Editor**: Drag-and-drop positioning with pixel-perfect precision using percentage-based coordinates
 - **Real-time Shape Controls**: Live resizing (2-30% scale) and 360° rotation with visual feedback
-- **Interactive Handles**: Hover-activated resize (⇕) and rotation (↻) controls for fine-tuning
+- **Interactive Handles**: Hover-activated blue resize handles (⇕) and green rotation handles (↻) for fine-tuning
 - **Smart Validation**: Prevents saving incomplete challenges and provides helpful guidance
+- **Local Storage**: Challenges automatically save to browser storage for instant access
 - **Unlimited Creativity**: No restrictions on complexity - create simple icons or elaborate scenes
 
-### 🎮 **Play Mode** - Master the Puzzles  
-Solve community-created challenges with comprehensive performance tracking:
+### 🎮 **Play Mode** - Master Local Puzzles  
+Solve locally-created challenges with comprehensive performance tracking:
 - **Visual Analysis**: Study static shape arrangements to identify hidden meanings
-- **Smart Timing System**: Automatic timer activation on first guess attempt
+- **Smart Timing System**: Automatic timer activation on first guess attempt (allows unlimited study time)
 - **Attempt Analytics**: Track solving efficiency with detailed attempt counting
 - **Instant Feedback**: Real-time validation with encouraging messages for incorrect guesses
 - **Achievement Celebration**: Success screens with performance metrics and completion times
+- **Challenge Library**: Browse and select from all your saved challenges with difficulty indicators
+
+### 🏆 **Challenge Mode** - Reddit-Integrated Competition
+Experience server-backed challenges with leaderboards and social features:
+- **Default Challenges**: Pre-built challenges available immediately upon app installation
+- **Real-time Performance Tracking**: Server-side session management with precise timing and attempt counting
+- **Global Leaderboards**: Compete with other Reddit users on completion time and attempts
+- **Persistent Progress**: Your performance is saved and ranked across the Reddit community
+- **Social Integration**: Challenges tied to specific Reddit posts for community engagement
+- **Live Competition**: Real-time leaderboard updates showing your position among all players
 
 Built as a React TypeScript application for Reddit's Devvit platform, the game integrates seamlessly into Reddit posts, making it instantly accessible to millions of users without requiring external downloads or account creation.
+
+## What Makes This Game Unique?
+
+### 🎨 **Interactive Shape Creation System**
+Unlike static puzzle games, Shape Guess Challenge features a sophisticated drag-and-drop editor where players can:
+- **Position shapes with pixel precision** using percentage-based coordinates that work across all devices
+- **Resize shapes dynamically** from 2% to 30% of canvas size with real-time visual feedback
+- **Rotate shapes 360 degrees** with intuitive circular drag controls for perfect orientation
+- **Layer and overlap shapes** to create complex visual narratives and depth
+
+### 🏆 **Dual-Layer Gaming Experience**
+The game uniquely combines local creativity with global competition:
+- **Local Creative Mode**: Build and solve personal challenges with instant feedback and local storage
+- **Reddit-Integrated Challenges**: Server-backed challenges with real-time leaderboards and community competition
+- **Seamless Mode Switching**: Players can create locally and compete globally within the same interface
+- **Progressive Difficulty**: Start with default challenges, then explore community-created content
+
+### 🧩 **Community-Driven Puzzle Ecosystem**
+Every player is both creator and solver, generating an endless stream of unique challenges:
+- **Personal Challenge Libraries**: Each player builds their own collection of visual puzzles
+- **Reddit Post Integration**: Challenges are embedded directly in Reddit posts for maximum accessibility
+- **Global Leaderboards**: Compete with the entire Reddit community on solving speed and efficiency
+- **Social Sharing**: Challenges can be shared and solved within Reddit communities with persistent rankings
+
+### 📱 **Mobile-First Reddit Integration**
+Specifically designed for Reddit's mobile-heavy user base:
+- **Touch-optimized controls** with hover states that work on both desktop and mobile
+- **Responsive canvas** that maintains perfect proportions across all screen sizes
+- **Native Reddit experience** - no external apps or downloads required
+- **Instant accessibility** - playable directly within Reddit posts with automatic user authentication
 
 ## Current Game Features
 
@@ -37,27 +78,158 @@ Built as a React TypeScript application for Reddit's Devvit platform, the game i
   - Hover-activated controls that appear only when needed
 - **Smart Shape Management**: Shift+Click deletion, z-index management during manipulation, and visual feedback systems
 
-### 🎮 **Dual-Mode Gameplay**
-- **Create Mode**: Professional-grade visual editor for designing custom challenges
-- **Play Mode**: Puzzle-solving interface with performance tracking and analytics
-- **Seamless Navigation**: Fluid transitions between modes with state preservation
+### 🎮 **Multi-Mode Gameplay Architecture**
+- **Create Mode**: Professional-grade visual editor for designing custom challenges with local storage
+- **Play Mode**: Local puzzle-solving interface with performance tracking and analytics
+- **Challenge Mode**: Server-integrated Reddit challenges with real-time competition features
+- **Seamless Navigation**: Fluid transitions between all modes with state preservation
 
-### 💾 **Intelligent Data Persistence**
-- **Local Storage Integration**: Challenges automatically save to browser storage
-- **Complex Data Serialization**: Preserves shape positions, sizes, rotations, and metadata
-- **Error Recovery**: Graceful handling of corrupted data with fallback systems
-- **Session Persistence**: Maintains game state across browser restarts
+### 🏆 **Server-Side Challenge System**
+- **Default Challenge Creation**: Automatic challenge generation when the app is installed on a subreddit
+- **Real-Time Session Management**: Server-tracked user sessions with precise timing and attempt counting
+- **Global Leaderboards**: Redis-backed ranking system comparing players across the entire Reddit community
+- **Performance Metrics**: Comprehensive tracking of completion times, attempts, and leaderboard positions
+- **Persistent User Progress**: Challenge completion data saved server-side and tied to Reddit user accounts
 
-### 📊 **Performance Analytics**
-- **Smart Timer System**: Begins timing only on first guess attempt
-- **Attempt Tracking**: Detailed counting of solving efficiency
-- **Success Celebrations**: Animated victory screens with personalized metrics
-- **Challenge Statistics**: Shape count indicators and difficulty assessment
+### 💾 **Dual-Layer Data Persistence**
+- **Local Storage Integration**: Personal challenges automatically save to browser storage for offline access
+- **Server-Side Storage**: Reddit-integrated challenges stored in Redis with cross-device synchronization
+- **Complex Data Serialization**: Preserves shape positions, sizes, rotations, and metadata in both systems
+- **Error Recovery**: Graceful handling of corrupted data with fallback systems for both local and server storage
+- **Session Persistence**: Maintains game state across browser restarts and device switches
+
+### 📊 **Advanced Performance Analytics**
+- **Smart Timer System**: Begins timing only on first guess attempt with millisecond precision
+- **Attempt Tracking**: Detailed counting of solving efficiency with server-side validation
+- **Success Celebrations**: Animated victory screens with personalized metrics and leaderboard positions
+- **Challenge Statistics**: Shape count indicators, difficulty assessment, and community performance comparisons
+- **Real-Time Leaderboards**: Live ranking updates showing your position among all Reddit players
+
+## How to Play Shape Guess Challenge
+
+### 🎯 **Game Overview**
+Shape Guess Challenge is a creative puzzle game where players use Unicode shapes to create visual riddles. The game features three distinct modes: **Create** (design personal challenges), **Play** (solve local challenges), and **Challenge** (compete in Reddit-integrated challenges with leaderboards).
+
+### 🎨 **Creating Personal Challenges (Create Mode)**
+
+1. **Start Creating**
+   - Click "🎨 Create Challenge" from the main menu's vibrant interface
+   - Enter the green-to-blue gradient creative environment
+   - You'll see a shape toolbar at the top and a responsive canvas below
+
+2. **Choose Your Shapes**
+   - Select from 10 different Unicode shapes: ●, ▮, ▲, ★, ♦, ▼, ◆, ⬛, ⬤, ▪
+   - Active shapes display with blue background highlighting
+   - Adjust the size (2-30% of canvas) using the responsive size slider
+   - Set rotation (0-359°) using the precision rotation control
+   - Click "Add Shape" to place it on the canvas at a randomized starting position
+
+3. **Advanced Shape Manipulation**
+   - **Move**: Click and drag any shape to reposition it with pixel-perfect precision
+   - **Resize**: Hover over a shape to reveal the blue handle (⇕), then drag up/down to change size
+   - **Rotate**: Hover over a shape to reveal the green handle (↻), then drag in circular motions for 360° rotation
+   - **Delete**: Hold Shift and click any shape to instantly remove it
+   - **Visual Feedback**: Handles appear only on hover, active shapes elevate with z-index management
+
+4. **Set Your Answer**
+   - Enter what your shape arrangement represents in the answer field
+   - Examples: "house", "cat", "sunset", "robot dancing", "happiness"
+   - Answers automatically convert to lowercase and trim whitespace
+
+5. **Save Your Challenge**
+   - Click "💾 Save Challenge" to add it to your local collection with automatic browser storage
+   - Smart validation prevents saving with helpful alerts for missing shapes or answers
+   - Use "Clear All" to remove all shapes and start fresh
+   - Success confirmation: "Challenge saved! 🎉"
+
+### 🎮 **Playing Local Challenges (Play Mode)**
+
+1. **Select a Challenge**
+   - Click "🎮 Play Challenge" from the main menu
+   - Browse your elegant challenge library with difficulty indicators
+   - Each challenge shows name and shape count (e.g., "🎯 House (5 shapes)")
+   - Empty state guides you to create your first puzzle if none exist
+
+2. **Study the Puzzle**
+   - Examine the static arrangement of black shapes on the white canvas
+   - Take unlimited time to analyze - no pressure before your first guess
+   - Canvas maintains perfect 5:4 aspect ratio across all devices
+
+3. **Make Your Guess**
+   - Type what you think the shapes represent in the clean input field
+   - Press Enter or click "Submit Guess" for dual submission methods
+   - Get instant feedback: ❌ "Not quite! Try again." for incorrect guesses
+   - Input field clears automatically after incorrect attempts
+
+4. **Track Your Performance**
+   - Visible attempt counter increments with each guess
+   - Smart timer starts only on your first guess attempt
+   - See detailed performance metrics upon successful completion
+   - Animated celebration screen with 🎯 emoji for correct answers
+
+5. **Continue Playing**
+   - "Play Another Challenge" button for immediate next puzzle
+   - "← Choose Different Challenge" to browse other puzzles mid-game
+   - Seamless navigation maintains your progress and preferences
+
+### 🏆 **Competing in Reddit Challenges (Challenge Mode)**
+
+1. **Access Reddit Challenges**
+   - When the app is installed on a subreddit, a default challenge is automatically created
+   - Click the "🎯 Play Challenge" button from the Reddit post to enter Challenge Mode
+   - Automatic detection switches to challenge mode with server integration
+
+2. **Server-Tracked Gameplay**
+   - Your session is automatically created and tracked server-side with Redis storage
+   - Real-time timer displays in the header with precise elapsed time tracking
+   - All attempts are recorded and validated by the server with immediate feedback
+   - Offline detection prevents submissions when internet connection is lost
+
+3. **Professional Challenge Interface**
+   - Clean header shows challenge name, timer, and attempt counter
+   - Responsive canvas renders server-provided shapes with HTML5 Canvas API
+   - Real-time performance metrics update as you play
+   - Loading states and error handling for network issues
+
+4. **Study and Solve**
+   - Examine the challenge shapes rendered with precise positioning and rotation
+   - The interface shows your current attempt count and elapsed time in real-time
+   - Enter your guess in the bottom input field with placeholder guidance
+   - Submit button provides clear feedback ("Submitting...", "Offline", etc.)
+
+5. **Real-Time Competition**
+   - Correct answers immediately update the global leaderboard stored in Redis
+   - See your ranking among all Reddit players who completed the challenge
+   - Performance metrics include attempts, completion time, and leaderboard position
+   - Instant leaderboard position notification upon successful completion
+
+6. **Celebration and Continuation**
+   - Animated success screens show detailed performance metrics and community ranking
+   - Performance breakdown includes attempts, time elapsed, and leaderboard position
+   - Options to "Play Again" or return to menu with state preservation
+   - Your completion data is permanently saved to your Reddit profile
+
+7. **View Global Leaderboards**
+   - Click "🏆 View Leaderboard" from the main menu in challenge mode
+   - See top performers with usernames, attempts, completion times, and ranks
+   - Your position is highlighted if you've completed the challenge
+   - Real-time updates show the latest completions and rankings
+
+### 💡 **Pro Tips**
+- **For Creators**: Start simple with 2-3 shapes, use rotation creatively, think about both literal objects and abstract concepts
+- **For Local Solvers**: Look for familiar patterns, consider multiple perspectives, don't limit yourself to obvious interpretations  
+- **For Reddit Competitors**: Study the challenge thoroughly before your first guess - the timer starts immediately and affects your leaderboard position
+- **Mobile Optimization**: All controls are touch-optimized with responsive design that works perfectly on smartphones and tablets
+- **Performance Strategy**: Take time to analyze before guessing - unlimited study time doesn't count against your completion time
 
 ## What Makes This Game Innovative?
 
-### 🎨 **Community-Driven Content Creation**
-Unlike traditional puzzle games with fixed content, Silhouettr creates a self-sustaining ecosystem where every player becomes both creator and solver. This dual-role system generates infinite, unique challenges as the community continuously contributes new visual puzzles, ensuring fresh content and endless replayability.
+### 🎨 **Dual-Layer Gaming Ecosystem**
+Shape Guess Challenge uniquely combines local creativity with global competition in a seamless experience:
+- **Local Creative Sandbox**: Build unlimited personal challenges with instant browser storage and offline access
+- **Reddit-Integrated Competition**: Server-backed challenges with real-time leaderboards and community rankings
+- **Seamless Mode Switching**: Players can create locally and compete globally within the same polished interface
+- **Progressive Engagement**: Start with personal challenges, then compete in Reddit's social gaming environment
 
 ### 🔧 **Professional-Grade Visual Editor**
 The game features a sophisticated shape manipulation system that rivals professional design software:
@@ -67,13 +239,13 @@ The game features a sophisticated shape manipulation system that rivals professi
 - **Multi-Handle Controls**: Hover-activated blue resize handles (⇕) and green rotation handles (↻) provide intuitive editing
 - **Real-Time Feedback**: Live size percentages (2-30%) and rotation degrees (0-359°) with smooth visual transitions
 - **Smart State Management**: Seamless switching between drag, resize, and rotate modes with visual indicators
-- **Responsive Canvas**: Maintains perfect 5:4 aspect ratio while adapting to any screen size
+- **Responsive Canvas**: Maintains perfect 5:4 aspect ratio while adapting to any screen size from mobile to desktop
 
 **Intuitive Editing Features:**
-- **Quick Actions**: Shift+Click deletion for rapid iteration
+- **Quick Actions**: Shift+Click deletion for rapid iteration and experimentation
 - **Visual Hierarchy**: Z-index management keeps active shapes on top during manipulation
-- **Undo-Friendly**: Clear canvas option for complete resets without losing progress
-- **Error Prevention**: Smart validation prevents saving incomplete or invalid challenges
+- **Professional Controls**: Hover-activated handles that appear only when needed for clean interface
+- **Error Prevention**: Smart validation prevents saving incomplete or invalid challenges with helpful guidance
 
 ### 📱 **Mobile-First Reddit Integration**
 Specifically engineered for Reddit's predominantly mobile user base:
@@ -87,24 +259,45 @@ Specifically engineered for Reddit's predominantly mobile user base:
   - `user-scalable=no` prevents unwanted zooming while maintaining precise touch control
   - Responsive font sizing using `vw` units with maximum caps for consistent appearance
 
-### 💾 **Intelligent Local Persistence**
-Implements a robust client-side storage system that eliminates server dependencies:
-- **Complex Data Serialization**: Automatically saves shape arrangements with position, size, rotation, and metadata
-- **Error Recovery**: Graceful handling of corrupted data with fallback to empty state
-- **Session Persistence**: Challenges survive browser restarts and maintain state across sessions
-- **Unlimited Storage**: Only limited by browser storage capacity, supporting hundreds of challenges
-- **Instant Loading**: No network delays - challenges load immediately from local storage
+### 💾 **Intelligent Dual-Storage System**
+Implements both local and server-side storage for optimal user experience:
+- **Local Browser Storage**: Personal challenges automatically save with complex data serialization
+- **Server-Side Persistence**: Reddit challenges stored in Redis with cross-device synchronization
+- **Error Recovery**: Graceful handling of corrupted data with fallback systems for both storage types
+- **Session Persistence**: Challenges and progress survive browser restarts and device switches
+- **Unlimited Local Storage**: Only limited by browser capacity, supporting hundreds of personal challenges
+- **Instant Loading**: Local challenges load immediately, server challenges cache for optimal performance
 
 ### ⚡ **Advanced Performance Analytics**
 Comprehensive tracking system that gamifies the solving experience:
 - **Smart Timer Logic**: Begins timing only on first guess attempt, allowing unlimited study time
 - **Precision Metrics**: Millisecond-accurate timing converted to user-friendly second displays
-- **Attempt Efficiency**: Detailed tracking of guess patterns and solving strategies
+- **Dual-Mode Tracking**: Local performance for personal challenges, server tracking for Reddit competition
 - **Celebration System**: Animated success screens with personalized performance breakdowns
 - **Difficulty Assessment**: Shape count indicators help players choose appropriate challenge levels
 - **Progress Visualization**: Clear display of total challenges created and completion statistics
 
-## Complete Step-by-Step Gameplay Guide
+### 🏆 **Revolutionary Server-Side Reddit Integration**
+Transforms the game into a social competitive experience:
+- **Automatic Challenge Deployment**: Default challenges created instantly when app is installed on any subreddit
+- **Real-Time Session Management**: Server tracks user sessions with millisecond precision using Redis storage
+- **Global Leaderboard System**: 
+  - Redis sorted sets maintain rankings across all Reddit users
+  - Scoring algorithm combines completion time and attempt count for fair competition
+  - Live leaderboard updates show your position immediately after completion
+- **Cross-Device Synchronization**: Your progress and rankings persist across all devices through Reddit authentication
+- **Community Competition**: Compete with thousands of Reddit users in real-time challenges
+- **Performance Persistence**: All completion data permanently stored and tied to your Reddit account
+
+### 🎯 **Community-Driven Content Creation**
+Unlike traditional puzzle games with fixed content, Shape Guess Challenge creates a self-sustaining ecosystem:
+- **Every Player is a Creator**: Dual-role system where players both create and solve challenges
+- **Infinite Content Generation**: Community continuously contributes new visual puzzles
+- **Local and Global Sharing**: Personal challenges for practice, Reddit challenges for competition
+- **Creative Freedom**: No restrictions on complexity - from simple icons to elaborate artistic scenes
+- **Social Validation**: Reddit integration provides community feedback and recognition for creative challenges
+
+## Advanced Gameplay Guide
 
 ### 🎨 **Creating Your First Visual Challenge**
 
@@ -266,19 +459,30 @@ Comprehensive tracking system that gamifies the solving experience:
 
 ## Recent Updates & Current Status
 
-### ✨ **Latest Improvements**
-- **Enhanced Canvas Integration**: Added `canvasRef` prop to Canvas component for improved shape manipulation
-- **Refined Component Architecture**: Completed modular refactoring with clean separation of concerns
-- **Advanced Hook System**: Implemented `useShapeManipulation` hook for centralized interaction logic
-- **Improved Type Safety**: Comprehensive TypeScript interfaces across all components
-- **Mobile Optimization**: Enhanced responsive design with touch-optimized controls
+### ✨ **Latest Major Features**
+- **Complete Reddit Challenge Integration**: Full server-side challenge system with Redis storage and real-time leaderboards
+- **ChallengeView Component**: Dedicated interface for Reddit-integrated challenges with live timer and attempt tracking
+- **Server-Side Session Management**: Automatic user session creation and tracking with performance analytics
+- **Global Leaderboard System**: Redis-backed ranking system comparing players across the entire Reddit community
+- **Default Challenge Creation**: Automatic challenge generation when the app is installed on any subreddit
+- **Offline Detection**: Smart offline/online detection with graceful degradation and automatic retry
 
-### 🔧 **Current Implementation**
-- **Fully Functional Create Mode**: Complete shape editor with all manipulation tools
-- **Interactive Play Mode**: Challenge solving with performance tracking
-- **Local Storage Persistence**: Reliable challenge saving and loading
-- **Cross-Device Compatibility**: Consistent experience across mobile and desktop
-- **Professional UI/UX**: Polished interface with smooth animations and transitions
+### 🔧 **Current Implementation Status**
+- **✅ Fully Functional Create Mode**: Complete shape editor with all manipulation tools and local browser storage
+- **✅ Interactive Local Play Mode**: Challenge solving with performance tracking for personal challenges
+- **✅ Reddit Challenge Mode**: Server-integrated challenges with real-time competition and leaderboards
+- **✅ Cross-Device Compatibility**: Consistent experience across mobile and desktop with responsive design
+- **✅ Professional UI/UX**: Polished interface with smooth animations, loading states, and comprehensive error handling
+- **✅ Complete Server Infrastructure**: Express.js backend with Redis integration and Reddit API connectivity
+- **✅ Real-Time Performance Tracking**: Precise timing, attempt counting, and leaderboard position updates
+
+### 🚧 **Integration Status**
+- **✅ Server Endpoints**: All API endpoints implemented and functional (`/api/challenge/:postId`, `/api/submit-guess`, `/api/leaderboard/:postId`)
+- **✅ Client Components**: ChallengeView, Timer, AttemptCounter, and Leaderboard components fully implemented and integrated
+- **✅ Data Flow**: Complete client-server communication with proper error handling, loading states, and retry logic
+- **✅ Performance Tracking**: Real-time session management with precise timing and attempt counting
+- **✅ Reddit Integration**: Seamless authentication and post-based challenge system with automatic mode detection
+- **✅ Offline Support**: Network status detection with graceful degradation and user feedback
 
 ## Technical Stack
 
@@ -293,31 +497,39 @@ Comprehensive tracking system that gamifies the solving experience:
 The game is built with a modular React component architecture featuring clean separation of concerns:
 
 ### Core Components
-- **`App.tsx`**: Main application component managing global state, view routing, and challenge lifecycle
-- **`MenuView.tsx`**: Main menu interface with navigation and challenge statistics
+- **`App.tsx`**: Main application component managing global state, view routing, and Reddit challenge lifecycle
+- **`MenuView.tsx`**: Main menu interface with navigation
 - **`CreateView.tsx`**: Challenge creation interface integrating shape tools and canvas
-- **`PlayView.tsx`**: Challenge solving interface with guess input and performance tracking
+- **`ChallengeView.tsx`**: Reddit-integrated challenge interface with server communication and leaderboards
 - **`Canvas.tsx`**: Reusable canvas component handling shape rendering and manipulation interactions
 - **`ShapeToolbar.tsx`**: Shape selection, sizing, and rotation controls
+- **`Timer.tsx`**: Real-time timer component with precise elapsed time tracking
+- **`AttemptCounter.tsx`**: Attempt tracking with performance metrics and visual feedback
+- **`Leaderboard.tsx`**: Global ranking display with user position highlighting
 
 ### Custom Hooks
 - **`useShapeManipulation.ts`**: Advanced hook managing drag, resize, and rotate operations with mouse/touch events
 
 ### Type System
-- **`types.ts`**: Comprehensive TypeScript interfaces ensuring type safety across all components
+- **`types.ts`**: Local component TypeScript interfaces for client-side functionality
+- **`shared/types/api.ts`**: Comprehensive API interfaces shared between client and server
 - **Shape Interface**: Defines shape properties (position, size, rotation, type)
-- **Challenge Interface**: Structures puzzle data with metadata
-- **Interaction Types**: Handles different manipulation modes (move, resize, rotate)
+- **Challenge Interface**: Structures puzzle data with metadata for both local and server challenges
+- **Session Interface**: Manages user session data with timing and attempt tracking
+- **API Response Types**: Structured responses for all server endpoints with error handling
 
 ### Component Hierarchy
 ```
-App (State Management & Routing)
+App (Local State Management & Routing)
 ├── MenuView (Navigation & Statistics)
 ├── CreateView (Challenge Creation)
 │   ├── ShapeToolbar (Shape Controls)
 │   └── Canvas (Interactive Editor)
-└── PlayView (Challenge Solving)
-    └── Canvas (Static Display)
+└── ChallengeView (Reddit-Integrated Challenges)
+    ├── Timer (Real-time Tracking)
+    ├── AttemptCounter (Performance Metrics)
+    ├── Canvas (Server Challenge Display)
+    └── Leaderboard (Global Rankings)
 ```
 
 The architecture emphasizes reusability, maintainability, and type safety with shared components and centralized state management.

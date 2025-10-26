@@ -1,7 +1,9 @@
 import express from 'express';
-import { InitResponse, IncrementResponse, DecrementResponse } from '../shared/types/api';
+import { ChallengeResponse, ErrorResponse, GuessSubmissionRequest, GuessSubmissionResponse, LeaderboardResponse } from '../shared/types/api';
 import { redis, reddit, createServer, context, getServerPort } from '@devvit/web/server';
 import { createPost } from './core/post';
+import { getChallenge, validateGuess, getUserSession, updateSession } from './core/challenge';
+import { leaderboardService } from './core/leaderboard';
 
 const app = express();
 
@@ -12,84 +14,47 @@ app.use(express.urlencoded({ extended: true }));
 // Middleware for plain text body parsing
 app.use(express.text());
 
+// Trust proxy for rate limiting (if behind a proxy)
+app.set('trust proxy', 1);
+
 const router = express.Router();
 
-router.get<{ postId: string }, InitResponse | { status: string; message: string }>(
-  '/api/init',
-  async (_req, res): Promise<void> => {
-    const { postId } = context;
+// router.get<{ postId: string }, InitResponse | { status: string; message: string }>(
+//   '/api/init',
+//   async (_req, res): Promise<void> => {
+//     const { postId } = context;
 
-    if (!postId) {
-      console.error('API Init Error: postId not found in devvit context');
-      res.status(400).json({
-        status: 'error',
-        message: 'postId is required but missing from context',
-      });
-      return;
-    }
+//     if (!postId) {
+//       console.error('API Init Error: postId not found in devvit context');
+//       res.status(400).json({
+//         status: 'error',
+//         message: 'postId is required but missing from context',
+//       });
+//       return;
+//     }
 
-    try {
-      const [count, username] = await Promise.all([
-        redis.get('count'),
-        reddit.getCurrentUsername(),
-      ]);
+//     try {
+//       const [count, username] = await Promise.all([
+//         redis.get('count'),
+//         reddit.getCurrentUsername(),
+//       ]);
 
-      res.json({
-        type: 'init',
-        postId: postId,
-        count: count ? parseInt(count) : 0,
-        username: username ?? 'anonymous',
-      });
-    } catch (error) {
-      console.error(`API Init Error for post ${postId}:`, error);
-      let errorMessage = 'Unknown error during initialization';
-      if (error instanceof Error) {
-        errorMessage = `Initialization failed: ${error.message}`;
-      }
-      res.status(400).json({ status: 'error', message: errorMessage });
-    }
-  }
-);
-
-router.post<{ postId: string }, IncrementResponse | { status: string; message: string }, unknown>(
-  '/api/increment',
-  async (_req, res): Promise<void> => {
-    const { postId } = context;
-    if (!postId) {
-      res.status(400).json({
-        status: 'error',
-        message: 'postId is required',
-      });
-      return;
-    }
-
-    res.json({
-      count: await redis.incrBy('count', 1),
-      postId,
-      type: 'increment',
-    });
-  }
-);
-
-router.post<{ postId: string }, DecrementResponse | { status: string; message: string }, unknown>(
-  '/api/decrement',
-  async (_req, res): Promise<void> => {
-    const { postId } = context;
-    if (!postId) {
-      res.status(400).json({
-        status: 'error',
-        message: 'postId is required',
-      });
-      return;
-    }
-
-    res.json({
-      count: await redis.incrBy('count', -1),
-      postId,
-      type: 'decrement',
-    });
-  }
-);
+//       res.json({
+//         type: 'init',
+//         postId: postId,
+//         count: count ? parseInt(count) : 0,
+//         username: username ?? 'anonymous',
+//       });
+//     } catch (error) {
+//       console.error(`API Init Error for post ${postId}:`, error);
+//       let errorMessage = 'Unknown error during initialization';
+//       if (error instanceof Error) {
+//         errorMessage = `Initialization failed: ${error.message}`;
+//       }
+//       res.status(400).json({ status: 'error', message: errorMessage });
+//     }
+//   }
+// );
 
 router.post('/internal/on-app-install', async (_req, res): Promise<void> => {
   try {
@@ -123,6 +88,306 @@ router.post('/internal/menu/post-create', async (_req, res): Promise<void> => {
     });
   }
 });
+
+// Health check endpoint
+router.get('/api/health', async (_req, res): Promise<void> => {
+  try {
+    // Simple health check - just verify we can access Redis
+    await redis.get('health_check');
+
+    res.status(200).json({
+      status: 'healthy',
+      timestamp: Date.now(),
+    });
+  } catch (error) {
+    console.error('Health check error:', error);
+    res.status(503).json({
+      status: 'unhealthy',
+      timestamp: Date.now(),
+      error: 'Health check failed',
+    });
+  }
+});
+
+// Challenge retrieval endpoint
+router.get<{ postId: string }, ChallengeResponse | ErrorResponse>(
+  '/api/challenge/:postId',
+  async (req, res): Promise<void> => {
+    const { postId } = req.params;
+
+    if (!postId) {
+      res.status(400).json({
+        status: 'error',
+        message: 'postId is required',
+        code: 'MISSING_POST_ID',
+        retryable: false,
+      });
+      return;
+    }
+
+    try {
+      // Get current user
+      const username = await reddit.getCurrentUsername();
+      if (!username) {
+        res.status(401).json({
+          status: 'error',
+          message: 'User authentication required',
+          code: 'AUTH_REQUIRED',
+          retryable: false,
+        });
+        return;
+      }
+
+      // Retrieve challenge data
+      const challenge = await getChallenge(postId);
+      if (!challenge) {
+        res.status(404).json({
+          status: 'error',
+          message: 'Challenge not found',
+          code: 'CHALLENGE_NOT_FOUND',
+          retryable: false,
+        });
+        return;
+      }
+
+      // Get or create user session
+      const session = await getUserSession(username, postId);
+
+      res.json({
+        challenge,
+        session,
+      });
+    } catch (error) {
+      console.error(`Error retrieving challenge ${postId}:`, error);
+
+      let errorMessage = 'Failed to retrieve challenge';
+      const errorCode = 'CHALLENGE_RETRIEVAL_ERROR';
+      let retryable = true;
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        // Determine if error is retryable based on message
+        if (error.message.includes('corrupted') || error.message.includes('authentication')) {
+          retryable = false;
+        }
+      }
+
+      res.status(500).json({
+        status: 'error',
+        message: errorMessage,
+        code: errorCode,
+        retryable,
+      });
+    }
+  }
+);
+
+// Guess submission endpoint
+router.post<{}, GuessSubmissionResponse | ErrorResponse, GuessSubmissionRequest>(
+  '/api/submit-guess',
+  async (req, res): Promise<void> => {
+    const { postId, guess, sessionId } = req.body;
+
+    // Validate request data
+    if (!postId || !guess || !sessionId) {
+      res.status(400).json({
+        status: 'error',
+        message: 'postId, guess, and sessionId are required',
+        code: 'MISSING_REQUIRED_FIELDS',
+        retryable: false,
+      });
+      return;
+    }
+
+    try {
+      // Get current user
+      const username = await reddit.getCurrentUsername();
+      if (!username) {
+        res.status(401).json({
+          status: 'error',
+          message: 'User authentication required',
+          code: 'AUTH_REQUIRED',
+          retryable: false,
+        });
+        return;
+      }
+
+      // Get challenge data
+      const challenge = await getChallenge(postId);
+      if (!challenge) {
+        res.status(404).json({
+          status: 'error',
+          message: 'Challenge not found',
+          code: 'CHALLENGE_NOT_FOUND',
+          retryable: false,
+        });
+        return;
+      }
+
+      // Get user session and validate sessionId
+      const session = await getUserSession(username, postId);
+      if (!session || session.sessionId !== sessionId) {
+        res.status(400).json({
+          status: 'error',
+          message: 'Invalid or expired session',
+          code: 'INVALID_SESSION',
+          retryable: false,
+        });
+        return;
+      }
+
+      // Check if user has already completed this challenge
+      if (session.completed) {
+        res.status(400).json({
+          status: 'error',
+          message: 'Challenge already completed',
+          code: 'ALREADY_COMPLETED',
+          retryable: false,
+        });
+        return;
+      }
+
+      // Increment attempts
+      session.attempts += 1;
+      const updatedSession = await updateSession(session);
+
+      // Validate guess
+      const isCorrect = validateGuess(guess, challenge);
+      const elapsedTime = Date.now() - updatedSession.startTime;
+
+      if (isCorrect) {
+        // Mark session as completed
+        updatedSession.completed = true;
+        await updateSession(updatedSession);
+
+        // Record completion in leaderboard
+        const leaderboardPosition = await leaderboardService.recordCompletion(
+          postId,
+          username,
+          elapsedTime,
+          updatedSession.attempts
+        );
+
+        res.json({
+          correct: true,
+          attempts: updatedSession.attempts,
+          timeElapsed: elapsedTime,
+          leaderboardPosition,
+          message: 'Congratulations! You solved the challenge!',
+        });
+      } else {
+        res.json({
+          correct: false,
+          attempts: updatedSession.attempts,
+          message: 'Incorrect guess. Try again!',
+        });
+      }
+    } catch (error) {
+      console.error(`Error processing guess submission for post ${postId}:`, error);
+
+      let errorMessage = 'Failed to process guess submission';
+      const errorCode = 'GUESS_SUBMISSION_ERROR';
+      let retryable = true;
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        // Determine if error is retryable based on message
+        if (error.message.includes('corrupted') || error.message.includes('authentication')) {
+          retryable = false;
+        }
+      }
+
+      res.status(500).json({
+        status: 'error',
+        message: errorMessage,
+        code: errorCode,
+        retryable,
+      });
+    }
+  }
+);
+
+// Leaderboard retrieval endpoint
+router.get<{ postId: string }, LeaderboardResponse | ErrorResponse>(
+  '/api/leaderboard/:postId',
+  async (req, res): Promise<void> => {
+    const { postId } = req.params;
+    const { limit = '10', offset = '0' } = req.query;
+
+    if (!postId) {
+      res.status(400).json({
+        status: 'error',
+        message: 'postId is required',
+        code: 'MISSING_POST_ID',
+        retryable: false,
+      });
+      return;
+    }
+
+    try {
+      // Parse query parameters
+      const limitNum = Math.min(Math.max(parseInt(limit as string) || 10, 1), 100); // Max 100 entries
+      const offsetNum = Math.max(parseInt(offset as string) || 0, 0);
+
+      // Get current user (optional for leaderboard viewing)
+      const username = await reddit.getCurrentUsername();
+
+      // Verify challenge exists
+      const challenge = await getChallenge(postId);
+      if (!challenge) {
+        res.status(404).json({
+          status: 'error',
+          message: 'Challenge not found',
+          code: 'CHALLENGE_NOT_FOUND',
+          retryable: false,
+        });
+        return;
+      }
+
+      // Get leaderboard data
+      let leaderboardResponse: LeaderboardResponse;
+
+      if (username) {
+        // Get leaderboard with user's position highlighted
+        leaderboardResponse = await leaderboardService.getLeaderboardWithUserPosition(
+          postId,
+          username,
+          limitNum
+        );
+      } else {
+        // Get standard leaderboard
+        leaderboardResponse = await leaderboardService.getLeaderboard(
+          postId,
+          limitNum,
+          offsetNum
+        );
+      }
+
+      res.json(leaderboardResponse);
+    } catch (error) {
+      console.error(`Error retrieving leaderboard for post ${postId}:`, error);
+
+      let errorMessage = 'Failed to retrieve leaderboard';
+      const errorCode = 'LEADERBOARD_RETRIEVAL_ERROR';
+      let retryable = true;
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        // Determine if error is retryable based on message
+        if (error.message.includes('corrupted') || error.message.includes('not found')) {
+          retryable = false;
+        }
+      }
+
+      res.status(500).json({
+        status: 'error',
+        message: errorMessage,
+        code: errorCode,
+        retryable,
+      });
+    }
+  }
+);
 
 // Use router middleware
 app.use(router);

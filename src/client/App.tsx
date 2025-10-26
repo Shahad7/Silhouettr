@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { MenuView, CreateView, PlayView } from './components';
+import { MenuView, CreateView, ChallengeView, Leaderboard } from './components';
 import { useShapeManipulation } from './hooks/useShapeManipulation';
-import { Shape, Challenge, View, HandleType } from './types';
+import { Shape, View, HandleType } from './types';
+// UserSession is managed within ChallengeView component
 
 // Utility function to generate unique IDs
-const generateId = (): string => '_' + Math.random().toString(36).substr(2, 9);
+const generateId = (): string => '_' + Math.random().toString(36).slice(2, 11);
 
 // Available shapes for the toolbar - using solid black Unicode shapes
 const SHAPE_PALETTE: string[] = ['●', '▮', '▲', '★', '♦', '▼', '◆', '⬛', '⬤', '▪'];
 
 function App() {
-  // Main view state: 'menu', 'create', 'play'
+  // Main view state: 'menu', 'create', 'challenge', 'leaderboard'
   const [view, setView] = useState<View>('menu');
+  
+  // Challenge mode state - always true now since we only support Reddit challenges
+  const [currentPostId, setCurrentPostId] = useState<string | null>(null);
+  // Session state is managed within ChallengeView component
 
   // Challenge creation state
   const [selectedShape, setSelectedShape] = useState<string>(SHAPE_PALETTE[0]!);
@@ -31,36 +36,16 @@ function App() {
     handleMouseUp,
   } = useShapeManipulation();
 
-  // Saved challenges (loaded from localStorage)
-  const [challenges, setChallenges] = useState<Challenge[]>([]);
-
-  // Play state
-  const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
-  const [guess, setGuess] = useState<string>('');
-  const [attempts, setAttempts] = useState<number>(0);
-  const [startTime, setStartTime] = useState<number | null>(null);
-  const [solved, setSolved] = useState<boolean>(false);
-  const [solveTime, setSolveTime] = useState<number>(0);
-
-  // Load challenges from localStorage on mount
+  // Detect challenge mode from URL parameters or global context
   useEffect(() => {
-    const saved = localStorage.getItem('shapeGuessChallenges');
-    if (saved) {
-      try {
-        setChallenges(JSON.parse(saved));
-      } catch (e) {
-        console.error('Error loading challenges:', e);
-        setChallenges([]);
-      }
+    const urlParams = new URLSearchParams(window.location.search);
+    const postId = urlParams.get('postId') || window.location.pathname.split('/').pop();
+    
+    if (postId && postId !== 'index.html') {
+      setCurrentPostId(postId);
+      setView('challenge');
     }
   }, []);
-
-  // Save challenges to localStorage whenever they change
-  useEffect(() => {
-    if (challenges && challenges.length > 0) {
-      localStorage.setItem('shapeGuessChallenges', JSON.stringify(challenges));
-    }
-  }, [challenges]);
 
   // ========== CREATE CHALLENGE FUNCTIONS ==========
 
@@ -85,7 +70,7 @@ function App() {
   };
 
   const onMouseMove = (e: React.MouseEvent): void => {
-    handleMouseMove(e, shapes, setShapes);
+    handleMouseMove(e, setShapes);
   };
 
   const deleteShape = (shapeId: string): void => {
@@ -96,7 +81,7 @@ function App() {
     setShapes([]);
   };
 
-  const saveChallenge = (): void => {
+  const saveChallenge = async (): Promise<void> => {
     if (!answer.trim()) {
       alert('Please enter an answer for the challenge!');
       return;
@@ -107,55 +92,52 @@ function App() {
       return;
     }
 
-    const newChallenge: Challenge = {
-      id: generateId(),
-      shapes: shapes.map(({ id, ...rest }) => rest), // Remove internal IDs, keep percentages and rotation
-      answer: answer.toLowerCase().trim(),
-      name: answer.trim(),
-    };
+    try {
+      // Create challenge via server API
+      const response = await fetch('/api/create-challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          shapes: shapes.map(({ id, ...rest }) => rest), // Remove internal IDs
+          answer: answer.toLowerCase().trim(),
+          name: answer.trim(),
+        }),
+      });
 
-    setChallenges((prevChallenges) => [...prevChallenges, newChallenge]);
+      if (!response.ok) {
+        throw new Error('Failed to create challenge');
+      }
 
-    // Reset creator
-    setShapes([]);
-    setAnswer('');
-    setSelectedRotation(0);
-    alert('Challenge saved! 🎉');
-  };
-
-  // ========== PLAY CHALLENGE FUNCTIONS ==========
-
-  const selectChallenge = (challengeId: string): void => {
-    const challenge = challenges.find((c) => c.id === challengeId);
-    if (!challenge) return;
-
-    setSelectedChallenge(challenge);
-    setGuess('');
-    setAttempts(0);
-    setStartTime(null);
-    setSolved(false);
-    setSolveTime(0);
-  };
-
-  const submitGuess = (): void => {
-    if (!selectedChallenge) return;
-
-    // Start timer on first attempt
-    if (attempts === 0) {
-      setStartTime(Date.now());
+      const data = await response.json();
+      
+      // Reset creator
+      setShapes([]);
+      setAnswer('');
+      setSelectedRotation(0);
+      
+      alert(`Challenge created! 🎉\nPost URL: ${data.postUrl}`);
+      setView('menu');
+    } catch (error) {
+      console.error('Error creating challenge:', error);
+      alert('Failed to create challenge. Please try again.');
     }
+  };
 
-    const newAttempts = attempts + 1;
-    setAttempts(newAttempts);
+  // ========== CHALLENGE MODE FUNCTIONS ==========
 
-    // Check if guess is correct
-    if (guess.toLowerCase().trim() === selectedChallenge.answer) {
-      const timeTaken = Math.floor((Date.now() - (startTime || Date.now())) / 1000);
-      setSolveTime(timeTaken);
-      setSolved(true);
-    } else {
-      alert('❌ Not quite! Try again.');
-      setGuess('');
+  const handleChallengeBack = (): void => {
+    setView('menu');
+  };
+
+  const handleViewLeaderboard = (): void => {
+    if (currentPostId) {
+      setView('leaderboard');
+    }
+  };
+
+  const handlePlayChallenge = (): void => {
+    if (currentPostId) {
+      setView('challenge');
     }
   };
 
@@ -167,9 +149,9 @@ function App() {
     <div className="font-sans">
       {view === 'menu' && (
         <MenuView
-          challenges={challenges}
           onCreateClick={() => setView('create')}
-          onPlayClick={() => setView('play')}
+          onPlayClick={handlePlayChallenge}
+          {...(currentPostId && { onLeaderboardClick: handleViewLeaderboard })}
         />
       )}
       {view === 'create' && (
@@ -197,20 +179,17 @@ function App() {
           onBackToMenu={() => setView('menu')}
         />
       )}
-      {view === 'play' && (
-        <PlayView
-          challenges={challenges}
-          selectedChallenge={selectedChallenge}
-          guess={guess}
-          attempts={attempts}
-          solved={solved}
-          solveTime={solveTime}
-          onChallengeSelect={selectChallenge}
-          onGuessChange={setGuess}
-          onSubmitGuess={submitGuess}
-          onBackToMenu={() => setView('menu')}
-          onCreateChallenge={() => setView('create')}
-          onDeselectChallenge={() => setSelectedChallenge(null)}
+      {view === 'challenge' && currentPostId && (
+        <ChallengeView
+          postId={currentPostId}
+          onBack={handleChallengeBack}
+        />
+      )}
+      {view === 'leaderboard' && currentPostId && (
+        <Leaderboard
+          postId={currentPostId}
+          onBack={handleChallengeBack}
+          onPlayChallenge={() => setView('challenge')}
         />
       )}
     </div>

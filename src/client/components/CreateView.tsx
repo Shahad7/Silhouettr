@@ -22,9 +22,9 @@ interface CreateViewProps {
   onShapeDelete: (shapeId: string) => void;
   onAnswerChange: (answer: string) => void;
   onClearCanvas: () => void;
-  onSaveChallenge: () => void;
+  onSaveChallenge: () => void | Promise<void>;
   onBackToMenu: () => void;
-  canvasRef?: React.RefObject<HTMLDivElement>;
+  canvasRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export const CreateView: React.FC<CreateViewProps> = ({
