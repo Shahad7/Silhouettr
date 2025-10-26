@@ -14,7 +14,7 @@ const DEFAULT_CHALLENGE: Omit<Challenge, 'id' | 'createdAt' | 'postId' | 'create
     { shape: 'triangle', xPercent: 70, yPercent: 30, sizePercent: 12, rotation: 0 }
   ],
   answer: 'house',
-  name: 'Welcome Challenge'
+  postTitle: 'Welcome to Shape Guess Challenge!'
 };
 
 // Redis key patterns - using centralized patterns from shared types
@@ -29,7 +29,7 @@ const getSubredditChallengesKey = (subredditName: string): string => {
 export const createChallenge = async (
   shapes: Shape[],
   answer: string,
-  name: string
+  postTitle: string
 ): Promise<{ challenge: Challenge; postUrl: string }> => {
   const { subredditName } = context;
   if (!subredditName) {
@@ -41,22 +41,24 @@ export const createChallenge = async (
     throw new Error('User must be authenticated to create challenges');
   }
 
-  // Create the challenge post first
+  // Create the challenge post first with custom title and creator attribution
+  const fullPostTitle = `${postTitle} - Created by u/${username}`;
+
   const post = await reddit.submitCustomPost({
     splash: {
       appDisplayName: 'Shape Guess Challenge',
       backgroundUri: 'default-splash.png',
       buttonLabel: 'Play Challenge',
-      description: `Can you guess what "${name}" looks like?`,
-      heading: `🎯 ${name}`,
+      description: `Can you solve this shape challenge?`,
+      heading: `🎯 ${postTitle}`,
       appIconUri: 'default-icon.png',
     },
     postData: {
       gameType: 'challenge',
-      challengeName: name,
+      challengeTitle: postTitle,
     },
     subredditName: subredditName,
-    title: `🎯 Shape Challenge: ${name}`,
+    title: fullPostTitle,
   });
 
   // Create challenge object
@@ -64,7 +66,7 @@ export const createChallenge = async (
     id: generateChallengeId(),
     shapes,
     answer: answer.toLowerCase().trim(),
-    name: name.trim(),
+    postTitle: postTitle.trim(),
     createdBy: username,
     createdAt: Date.now(),
     subredditName,
@@ -102,7 +104,7 @@ export const getChallenge = async (postId: string): Promise<Challenge | null> =>
   }
 
   const challengeKey = getChallengeKey(postId);
-  
+
   let challengeData: string | undefined;
   try {
     challengeData = await redis.get(challengeKey);
@@ -130,7 +132,7 @@ export const getChallengesForSubreddit = async (): Promise<Challenge[]> => {
   }
 
   const subredditChallengesKey = getSubredditChallengesKey(subredditName);
-  
+
   let challengeHash: Record<string, string>;
   try {
     challengeHash = await redis.hGetAll(subredditChallengesKey);
@@ -150,14 +152,14 @@ export const getChallengesForSubreddit = async (): Promise<Challenge[]> => {
     const timestampB = parseInt(challengeHash[b] || '0') || 0;
     return timestampB - timestampA; // newest first
   });
-  
+
   // Get all challenges in parallel, maintaining sorted order
   const challengePromises = sortedPostIds.map(async (postId: string) => {
     const challengeKey = getChallengeKey(postId);
-    
+
     try {
       const challengeData = await redis.get(challengeKey);
-      
+
       if (challengeData) {
         try {
           return JSON.parse(challengeData) as Challenge;
@@ -180,7 +182,7 @@ export const getChallengesForSubreddit = async (): Promise<Challenge[]> => {
     console.error('Failed to retrieve some challenge data:', error);
     throw new Error('Failed to load some challenges. Please try again.');
   }
-  
+
   // Filter out null results while maintaining chronological order
   const challenges: Challenge[] = [];
   results.forEach((challenge: Challenge | null) => {
@@ -207,7 +209,7 @@ export const createDefaultChallenge = async (postId: string): Promise<Challenge>
     id: generateChallengeId(),
     shapes: DEFAULT_CHALLENGE.shapes,
     answer: DEFAULT_CHALLENGE.answer.toLowerCase().trim(),
-    name: DEFAULT_CHALLENGE.name.trim(),
+    postTitle: DEFAULT_CHALLENGE.postTitle.trim(),
     createdBy: 'system',
     createdAt: Date.now(),
     subredditName,
@@ -248,11 +250,11 @@ export const validateGuess = (guess: string, challenge: Challenge): boolean => {
   if (!guess || !challenge || !challenge.answer) {
     return false;
   }
-  
+
   // Case-insensitive matching with trimmed whitespace
   const normalizedGuess = guess.toLowerCase().trim();
   const normalizedAnswer = challenge.answer.toLowerCase().trim();
-  
+
   return normalizedGuess === normalizedAnswer;
 };
 
@@ -262,20 +264,20 @@ export const getUserSession = async (username: string, postId: string): Promise<
   }
 
   const sessionKey = REDIS_KEYS.userSession(postId, username);
-  
+
   try {
     const sessionData = await redis.get(sessionKey);
-    
+
     if (sessionData) {
       const session = JSON.parse(sessionData) as UserSession;
-      
+
       // Check if session has timed out
       const now = Date.now();
       if (now - session.startTime > SESSION_TIMEOUT) {
         // Session expired, create new one
         return await createNewSession(username, postId);
       }
-      
+
       return session;
     } else {
       // No existing session, create new one
@@ -299,7 +301,7 @@ const createNewSession = async (username: string, postId: string): Promise<UserS
   };
 
   const sessionKey = REDIS_KEYS.userSession(postId, username);
-  
+
   try {
     // Store session with TTL (expire after session timeout + buffer)
     await redis.set(sessionKey, JSON.stringify(session));
@@ -318,11 +320,11 @@ export const updateSession = async (session: UserSession): Promise<UserSession> 
   }
 
   const sessionKey = REDIS_KEYS.userSession(session.postId, session.username);
-  
+
   try {
     // Update session data
     await redis.set(sessionKey, JSON.stringify(session));
-    
+
     // Refresh TTL if session is still active
     if (!session.completed) {
       await redis.expire(sessionKey, Math.ceil(SESSION_TIMEOUT / 1000) + 300);
@@ -339,7 +341,7 @@ export const cleanupExpiredSessions = async (postId: string): Promise<void> => {
   // This function can be called periodically to clean up expired sessions
   // For now, we rely on Redis TTL to handle cleanup automatically
   // In the future, this could scan for expired sessions and remove them manually
-  
+
   try {
     // Get all session keys for this post (this is a simplified approach)
     // In production, you might want to maintain a separate index of active sessions

@@ -1,18 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { 
-  challengeApi, 
-  ApiError, 
-  NetworkError, 
-  TimeoutError, 
-  handleApiError, 
-  isOnline, 
-  addOfflineListener 
+import {
+  challengeApi,
+  ApiError,
+  NetworkError,
+  TimeoutError,
+  handleApiError,
+  isOnline,
+  addOfflineListener
 } from './api';
-import type { 
-  ChallengeResponse, 
-  GuessSubmissionRequest, 
-  GuessSubmissionResponse, 
-  LeaderboardResponse 
+import type {
+  ChallengeResponse,
+  GuessSubmissionRequest,
+  GuessSubmissionResponse,
+  LeaderboardResponse
 } from '../../shared/types/api';
 
 // Mock fetch globally
@@ -22,7 +22,7 @@ global.fetch = mockFetch;
 describe('API Error Classes', () => {
   it('should create ApiError with correct properties', () => {
     const error = new ApiError('Test error', 404, true);
-    
+
     expect(error.message).toBe('Test error');
     expect(error.status).toBe(404);
     expect(error.retryable).toBe(true);
@@ -31,7 +31,7 @@ describe('API Error Classes', () => {
 
   it('should create NetworkError with default message', () => {
     const error = new NetworkError();
-    
+
     expect(error.message).toBe('Network connection failed');
     expect(error.retryable).toBe(true);
     expect(error.name).toBe('NetworkError');
@@ -39,7 +39,7 @@ describe('API Error Classes', () => {
 
   it('should create TimeoutError with default message', () => {
     const error = new TimeoutError();
-    
+
     expect(error.message).toBe('Request timed out');
     expect(error.retryable).toBe(true);
     expect(error.name).toBe('TimeoutError');
@@ -62,7 +62,7 @@ describe('challengeApi', () => {
           id: 'test-challenge',
           shapes: [],
           answer: 'test',
-          name: 'Test Challenge',
+          postTitle: 'Test Challenge',
           createdBy: 'user',
           createdAt: Date.now(),
           subredditName: 'test',

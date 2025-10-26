@@ -9,6 +9,7 @@ interface CreateViewProps {
   selectedRotation: number;
   shapes: Shape[];
   answer: string;
+  postTitle: string;
   dragging: string | null;
   resizing: string | null;
   rotating: string | null;
@@ -21,6 +22,7 @@ interface CreateViewProps {
   onMouseDown: (e: React.MouseEvent, shapeId: string, handleType?: HandleType) => void;
   onShapeDelete: (shapeId: string) => void;
   onAnswerChange: (answer: string) => void;
+  onPostTitleChange: (postTitle: string) => void;
   onClearCanvas: () => void;
   onSaveChallenge: () => void | Promise<void>;
   onBackToMenu: () => void;
@@ -33,6 +35,7 @@ export const CreateView: React.FC<CreateViewProps> = ({
   selectedRotation,
   shapes,
   answer,
+  postTitle,
   dragging,
   resizing,
   rotating,
@@ -45,6 +48,7 @@ export const CreateView: React.FC<CreateViewProps> = ({
   onMouseDown,
   onShapeDelete,
   onAnswerChange,
+  onPostTitleChange,
   onClearCanvas,
   onSaveChallenge,
   onBackToMenu,
@@ -81,6 +85,18 @@ export const CreateView: React.FC<CreateViewProps> = ({
             onMouseDown={onMouseDown}
             onShapeDelete={onShapeDelete}
             canvasRef={canvasRef}
+          />
+        </div>
+
+        {/* Post Title Input */}
+        <div className="mb-4 sm:mb-6">
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Post Title:</label>
+          <input
+            type="text"
+            value={postTitle}
+            onChange={(e) => onPostTitleChange(e.target.value)}
+            placeholder="e.g., My First Shape Challenge, Guess This Pattern"
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
           />
         </div>
 

@@ -1,8 +1,8 @@
 import express from 'express';
-import { ChallengeResponse, ErrorResponse, GuessSubmissionRequest, GuessSubmissionResponse, LeaderboardResponse } from '../shared/types/api';
+import { ChallengeResponse, ErrorResponse, GuessSubmissionRequest, GuessSubmissionResponse, LeaderboardResponse, CreateChallengeRequest, CreateChallengeResponse, GetChallengesResponse } from '../shared/types/api';
 import { redis, reddit, createServer, context, getServerPort } from '@devvit/web/server';
 import { createPost } from './core/post';
-import { getChallenge, validateGuess, getUserSession, updateSession } from './core/challenge';
+import { getChallenge, validateGuess, getUserSession, updateSession, createChallenge, getChallengesForSubreddit } from './core/challenge';
 import { leaderboardService } from './core/leaderboard';
 
 const app = express();
@@ -108,6 +108,190 @@ router.get('/api/health', async (_req, res): Promise<void> => {
     });
   }
 });
+
+// Challenge creation endpoint
+router.post<{}, CreateChallengeResponse | ErrorResponse, CreateChallengeRequest>(
+  '/api/create-challenge',
+  async (req, res): Promise<void> => {
+    const { shapes, answer, postTitle } = req.body;
+
+    // Validate request data
+    if (!shapes || !Array.isArray(shapes) || shapes.length === 0) {
+      res.status(400).json({
+        status: 'error',
+        message: 'shapes array is required and must not be empty',
+        code: 'INVALID_SHAPES',
+        retryable: false,
+      });
+      return;
+    }
+
+    if (!answer || typeof answer !== 'string' || answer.trim().length === 0) {
+      res.status(400).json({
+        status: 'error',
+        message: 'answer is required and must be a non-empty string',
+        code: 'INVALID_ANSWER',
+        retryable: false,
+      });
+      return;
+    }
+
+    if (!postTitle || typeof postTitle !== 'string' || postTitle.trim().length === 0) {
+      res.status(400).json({
+        status: 'error',
+        message: 'postTitle is required and must be a non-empty string',
+        code: 'INVALID_POST_TITLE',
+        retryable: false,
+      });
+      return;
+    }
+
+    // Validate shapes structure
+    for (let i = 0; i < shapes.length; i++) {
+      const shape = shapes[i];
+      if (!shape) {
+        res.status(400).json({
+          status: 'error',
+          message: `Shape ${i + 1}: shape object is required`,
+          code: 'INVALID_SHAPE_OBJECT',
+          retryable: false,
+        });
+        return;
+      }
+
+      if (!shape.shape || typeof shape.shape !== 'string') {
+        res.status(400).json({
+          status: 'error',
+          message: `Shape ${i + 1}: shape type is required`,
+          code: 'INVALID_SHAPE_TYPE',
+          retryable: false,
+        });
+        return;
+      }
+
+      if (typeof shape.xPercent !== 'number' || shape.xPercent < 0 || shape.xPercent > 100) {
+        res.status(400).json({
+          status: 'error',
+          message: `Shape ${i + 1}: xPercent must be a number between 0 and 100`,
+          code: 'INVALID_X_PERCENT',
+          retryable: false,
+        });
+        return;
+      }
+
+      if (typeof shape.yPercent !== 'number' || shape.yPercent < 0 || shape.yPercent > 100) {
+        res.status(400).json({
+          status: 'error',
+          message: `Shape ${i + 1}: yPercent must be a number between 0 and 100`,
+          code: 'INVALID_Y_PERCENT',
+          retryable: false,
+        });
+        return;
+      }
+
+      if (typeof shape.sizePercent !== 'number' || shape.sizePercent <= 0 || shape.sizePercent > 100) {
+        res.status(400).json({
+          status: 'error',
+          message: `Shape ${i + 1}: sizePercent must be a number between 0 and 100`,
+          code: 'INVALID_SIZE_PERCENT',
+          retryable: false,
+        });
+        return;
+      }
+
+      if (typeof shape.rotation !== 'number') {
+        res.status(400).json({
+          status: 'error',
+          message: `Shape ${i + 1}: rotation must be a number`,
+          code: 'INVALID_ROTATION',
+          retryable: false,
+        });
+        return;
+      }
+    }
+
+    try {
+      // Get current user
+      const username = await reddit.getCurrentUsername();
+      if (!username) {
+        res.status(401).json({
+          status: 'error',
+          message: 'User authentication required to create challenges',
+          code: 'AUTH_REQUIRED',
+          retryable: false,
+        });
+        return;
+      }
+
+      // Create the challenge
+      const { challenge, postUrl } = await createChallenge(shapes, answer, postTitle);
+
+      res.status(201).json({
+        type: 'create-challenge',
+        challenge,
+        postUrl,
+      });
+    } catch (error) {
+      console.error('Error creating challenge:', error);
+
+      let errorMessage = 'Failed to create challenge';
+      const errorCode = 'CHALLENGE_CREATION_ERROR';
+      let retryable = true;
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        // Determine if error is retryable based on message
+        if (error.message.includes('authentication') || error.message.includes('permission')) {
+          retryable = false;
+        }
+      }
+
+      res.status(500).json({
+        status: 'error',
+        message: errorMessage,
+        code: errorCode,
+        retryable,
+      });
+    }
+  }
+);
+
+// Get all challenges for subreddit endpoint
+router.get<{}, GetChallengesResponse | ErrorResponse>(
+  '/api/challenges',
+  async (_req, res): Promise<void> => {
+    try {
+      // Get all challenges for the current subreddit
+      const challenges = await getChallengesForSubreddit();
+
+      res.json({
+        type: 'get-challenges',
+        challenges,
+      });
+    } catch (error) {
+      console.error('Error retrieving challenges:', error);
+
+      let errorMessage = 'Failed to retrieve challenges';
+      const errorCode = 'CHALLENGES_RETRIEVAL_ERROR';
+      let retryable = true;
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        // Determine if error is retryable based on message
+        if (error.message.includes('subredditName') || error.message.includes('corrupted')) {
+          retryable = false;
+        }
+      }
+
+      res.status(500).json({
+        status: 'error',
+        message: errorMessage,
+        code: errorCode,
+        retryable,
+      });
+    }
+  }
+);
 
 // Challenge retrieval endpoint
 router.get<{ postId: string }, ChallengeResponse | ErrorResponse>(

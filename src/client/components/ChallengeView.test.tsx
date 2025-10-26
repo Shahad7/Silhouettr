@@ -28,7 +28,7 @@ describe('ChallengeView', () => {
       },
     ],
     answer: 'circle',
-    name: 'Test Challenge',
+    postTitle: 'Test Challenge',
     createdBy: 'testuser',
     createdAt: Date.now(),
     subredditName: 'testsubreddit',

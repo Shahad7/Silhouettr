@@ -129,7 +129,7 @@ const DEFAULT_CHALLENGE: Omit<Challenge, 'id' | 'createdAt' | 'postId'> = {
     { shape: 'triangle', xPercent: 70, yPercent: 30, sizePercent: 12, rotation: 0 }
   ],
   answer: 'house',
-  name: 'Welcome Challenge',
+  postTitle: 'Welcome to Shape Guess Challenge!',
   createdBy: 'system',
   subredditName: ''
 };

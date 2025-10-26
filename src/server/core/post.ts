@@ -14,17 +14,17 @@ export const createPost = async () => {
       appDisplayName: 'Shape Challenge',
       backgroundUri: 'default-splash.png',
       buttonLabel: 'Play Challenge',
-      description: 'Can you guess what this shape represents?',
-      heading: '🎯 Welcome Challenge',
+      description: 'Can you solve this shape challenge?',
+      heading: '🎯 Welcome to Shape Guess Challenge!',
       appIconUri: 'default-icon.png',
     },
     postData: {
       gameType: 'challenge',
-      challengeName: 'Welcome Challenge',
+      challengeTitle: 'Welcome to Shape Guess Challenge!',
       hasDefaultChallenge: true,
     },
     subredditName: subredditName,
-    title: '🎯 Shape Challenge: Welcome Challenge',
+    title: 'Welcome to Shape Guess Challenge! - Created by u/system',
   });
 
   // Create and store default challenge with retry logic
@@ -38,12 +38,12 @@ export const createPost = async () => {
     } catch (error) {
       retryCount++;
       console.error(`Failed to create default challenge (attempt ${retryCount}/${maxRetries}):`, error);
-      
+
       if (retryCount >= maxRetries) {
         console.error('Max retries reached for default challenge creation');
         throw new Error('Failed to create default challenge after multiple attempts. Please try again.');
       }
-      
+
       // Wait before retrying (exponential backoff)
       await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000));
     }

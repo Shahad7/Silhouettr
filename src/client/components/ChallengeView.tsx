@@ -40,17 +40,17 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
   // Load challenge data on mount and setup offline listener
   useEffect(() => {
     loadChallenge();
-    
+
     // Setup offline/online listener
     const removeOfflineListener = addOfflineListener((online) => {
       setState(prev => ({ ...prev, offline: !online }));
-      
+
       // Retry loading if we come back online and had an error
       if (online && state.error && state.retryable) {
         loadChallenge();
       }
     });
-    
+
     return removeOfflineListener;
   }, [postId]);
 
@@ -64,7 +64,7 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
   const loadChallenge = async () => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null, retryable: false }));
-      
+
       const data = await challengeApi.getChallenge(postId);
       setState(prev => ({
         ...prev,
@@ -118,7 +118,7 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
 
   const handleGuessSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!state.session || !state.guess.trim() || state.submitting || state.offline) return;
 
     try {
@@ -129,7 +129,7 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
         guess: state.guess.trim(),
         sessionId: state.session.sessionId,
       });
-      
+
       if (result.correct) {
         setState(prev => ({
           ...prev,
@@ -190,8 +190,8 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
             {state.offline ? 'Offline' : 'Error'}
           </h2>
           <p className="text-red-600 mb-4">
-            {state.offline 
-              ? 'You are currently offline. Please check your internet connection.' 
+            {state.offline
+              ? 'You are currently offline. Please check your internet connection.'
               : state.error
             }
           </p>
@@ -247,8 +247,8 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
               attempts={state.completionData.attempts}
               timeElapsed={state.completionData.timeElapsed || 0}
               completed={true}
-              {...(state.completionData.leaderboardPosition && { 
-                leaderboardPosition: state.completionData.leaderboardPosition 
+              {...(state.completionData.leaderboardPosition && {
+                leaderboardPosition: state.completionData.leaderboardPosition
               })}
             />
             <div className="mt-3 p-3 bg-gray-50 rounded text-center">
@@ -289,7 +289,7 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
             ← Back
           </button>
           <div className="flex flex-col items-center">
-            <h1 className="text-lg font-semibold">{state.challenge.name}</h1>
+            <h1 className="text-lg font-semibold">{state.challenge.postTitle}</h1>
             {state.offline && (
               <span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded">
                 Offline
@@ -297,7 +297,7 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
             )}
           </div>
           <div className="flex items-center gap-4">
-            <Timer 
+            <Timer
               {...(state.session?.startTime && { startTime: state.session.startTime })}
               isRunning={!state.completed && !!state.session && !state.offline}
             />
@@ -352,7 +352,7 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
             </button>
           </div>
           <p className="text-xs text-gray-500 mt-2 text-center">
-            {state.offline 
+            {state.offline
               ? "You need an internet connection to submit guesses"
               : "Look at the shapes and guess what they represent!"
             }

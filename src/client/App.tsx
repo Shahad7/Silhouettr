@@ -24,6 +24,7 @@ function App() {
   const [selectedRotation, setSelectedRotation] = useState<number>(0); // Rotation in degrees
   const [shapes, setShapes] = useState<Shape[]>([]); // Array of {id, shape, xPercent, yPercent, sizePercent, rotation}
   const [answer, setAnswer] = useState<string>('');
+  const [postTitle, setPostTitle] = useState<string>('');
 
   // Shape manipulation hook
   const {
@@ -82,6 +83,11 @@ function App() {
   };
 
   const saveChallenge = async (): Promise<void> => {
+    if (!postTitle.trim()) {
+      alert('Please enter a title for your post!');
+      return;
+    }
+
     if (!answer.trim()) {
       alert('Please enter an answer for the challenge!');
       return;
@@ -100,7 +106,7 @@ function App() {
         body: JSON.stringify({
           shapes: shapes.map(({ id, ...rest }) => rest), // Remove internal IDs
           answer: answer.toLowerCase().trim(),
-          name: answer.trim(),
+          postTitle: postTitle.trim(),
         }),
       });
 
@@ -113,6 +119,7 @@ function App() {
       // Reset creator
       setShapes([]);
       setAnswer('');
+      setPostTitle('');
       setSelectedRotation(0);
       
       alert(`Challenge created! 🎉\nPost URL: ${data.postUrl}`);
@@ -161,6 +168,7 @@ function App() {
           selectedRotation={selectedRotation}
           shapes={shapes}
           answer={answer}
+          postTitle={postTitle}
           dragging={dragging}
           resizing={resizing}
           rotating={rotating}
@@ -174,6 +182,7 @@ function App() {
           canvasRef={canvasRef}
           onShapeDelete={deleteShape}
           onAnswerChange={setAnswer}
+          onPostTitleChange={setPostTitle}
           onClearCanvas={clearCanvas}
           onSaveChallenge={saveChallenge}
           onBackToMenu={() => setView('menu')}

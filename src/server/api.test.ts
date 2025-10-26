@@ -336,7 +336,7 @@ describe('API Endpoints Integration Tests', () => {
         { shape: 'rectangle', xPercent: 50, yPercent: 60, sizePercent: 20, rotation: 45 },
       ],
       answer: 'house',
-      name: 'Test Challenge',
+      postTitle: 'Test Challenge',
       createdBy: 'testuser',
       createdAt: Date.now(),
       subredditName: 'testsubreddit',
@@ -456,7 +456,7 @@ describe('API Endpoints Integration Tests', () => {
   describe('Guess Submission Endpoint Logic', () => {
     it('should process correct guess and update leaderboard', async () => {
       const updatedSession = { ...mockSession, attempts: 1 };
-      
+
       // Setup mocks
       vi.mocked(reddit.getCurrentUsername).mockResolvedValue('testuser');
       vi.mocked(getChallenge).mockResolvedValue(mockChallenge);
@@ -497,7 +497,7 @@ describe('API Endpoints Integration Tests', () => {
 
     it('should process incorrect guess without updating leaderboard', async () => {
       const updatedSession = { ...mockSession, attempts: 2 };
-      
+
       // Setup mocks
       vi.mocked(reddit.getCurrentUsername).mockResolvedValue('testuser');
       vi.mocked(getChallenge).mockResolvedValue(mockChallenge);
@@ -567,7 +567,7 @@ describe('API Endpoints Integration Tests', () => {
 
     it('should return 400 when challenge is already completed', async () => {
       const completedSession = { ...mockSession, completed: true };
-      
+
       // Setup mocks
       vi.mocked(reddit.getCurrentUsername).mockResolvedValue('testuser');
       vi.mocked(getChallenge).mockResolvedValue(mockChallenge);
@@ -776,7 +776,7 @@ describe('API Endpoints Integration Tests', () => {
       // Step 3: Submit correct guess
       const updatedSession2 = { ...mockSession, attempts: 2 };
       const completedSession = { ...updatedSession2, completed: true };
-      
+
       vi.mocked(performanceTracker.getSession).mockResolvedValue(updatedSession1);
       vi.mocked(performanceTracker.incrementAttempts).mockResolvedValue(updatedSession2);
       vi.mocked(validateGuess).mockReturnValue(true);
@@ -965,10 +965,10 @@ describe('API Endpoints Integration Tests', () => {
       // Test that session validation is consistent
       vi.mocked(reddit.getCurrentUsername).mockResolvedValue('testuser');
       vi.mocked(getChallenge).mockResolvedValue(mockChallenge);
-      
+
       // Test with null session
       vi.mocked(performanceTracker.getSession).mockResolvedValue(null);
-      
+
       const response = await (global as any).testHandlers.guessSubmissionHandler(
         'test_post_123',
         'house',

@@ -34,7 +34,7 @@ describe('Challenge Redis Operations', () => {
     id: 'test_challenge_123',
     shapes: mockShapes,
     answer: 'test answer',
-    name: 'Test Challenge',
+    postTitle: 'Test Challenge',
     createdBy: 'testuser',
     createdAt: 1640995200000,
     subredditName: 'testsubreddit',
@@ -53,13 +53,13 @@ describe('Challenge Redis Operations', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    
+
     // Import the mocked modules
     const devvitModule = await import('@devvit/web/server');
     context = devvitModule.context;
     reddit = devvitModule.reddit;
     redis = devvitModule.redis;
-    
+
     // Import the functions to test
     const challengeModule = await import('./challenge');
     createChallenge = challengeModule.createChallenge;
@@ -68,7 +68,7 @@ describe('Challenge Redis Operations', () => {
     validateGuess = challengeModule.validateGuess;
     getUserSession = challengeModule.getUserSession;
     updateSession = challengeModule.updateSession;
-    
+
     // Reset context
     context.subredditName = 'testsubreddit';
   });
@@ -93,7 +93,7 @@ describe('Challenge Redis Operations', () => {
         'challenge:post123',
         expect.stringContaining('"answer":"test answer"')
       );
-      
+
       expect(redis.hSet).toHaveBeenCalledWith(
         'challenges:testsubreddit',
         expect.objectContaining({
@@ -102,7 +102,7 @@ describe('Challenge Redis Operations', () => {
       );
 
       expect(result.challenge.answer).toBe('test answer');
-      expect(result.challenge.name).toBe('Test Challenge');
+      expect(result.challenge.postTitle).toBe('Test Challenge');
     });
 
     it('should handle Redis set operation failures', async () => {
@@ -284,7 +284,7 @@ describe('Challenge Redis Operations', () => {
         'challenge:post123',
         expect.any(String)
       );
-      
+
       expect(redis.hSet).toHaveBeenCalledWith(
         'challenges:testsubreddit',
         expect.any(Object)
@@ -295,7 +295,7 @@ describe('Challenge Redis Operations', () => {
   describe('validateGuess', () => {
     it('should validate correct guess with case-insensitive matching', () => {
       const challenge = { ...mockChallenge, answer: 'house' };
-      
+
       expect(validateGuess('house', challenge)).toBe(true);
       expect(validateGuess('HOUSE', challenge)).toBe(true);
       expect(validateGuess('House', challenge)).toBe(true);
@@ -304,7 +304,7 @@ describe('Challenge Redis Operations', () => {
 
     it('should handle whitespace in guesses', () => {
       const challenge = { ...mockChallenge, answer: 'house' };
-      
+
       expect(validateGuess('  house  ', challenge)).toBe(true);
       expect(validateGuess(' HOUSE ', challenge)).toBe(true);
       expect(validateGuess('house\n', challenge)).toBe(true);
@@ -312,7 +312,7 @@ describe('Challenge Redis Operations', () => {
 
     it('should reject incorrect guesses', () => {
       const challenge = { ...mockChallenge, answer: 'house' };
-      
+
       expect(validateGuess('car', challenge)).toBe(false);
       expect(validateGuess('houses', challenge)).toBe(false);
       expect(validateGuess('hous', challenge)).toBe(false);
@@ -320,7 +320,7 @@ describe('Challenge Redis Operations', () => {
 
     it('should handle empty or invalid inputs', () => {
       const challenge = { ...mockChallenge, answer: 'house' };
-      
+
       expect(validateGuess('', challenge)).toBe(false);
       expect(validateGuess('   ', challenge)).toBe(false);
       expect(validateGuess('house', null as any)).toBe(false);
@@ -329,7 +329,7 @@ describe('Challenge Redis Operations', () => {
 
     it('should handle multi-word answers', () => {
       const challenge = { ...mockChallenge, answer: 'red car' };
-      
+
       expect(validateGuess('red car', challenge)).toBe(true);
       expect(validateGuess('RED CAR', challenge)).toBe(true);
       expect(validateGuess('  Red Car  ', challenge)).toBe(true);
@@ -486,11 +486,11 @@ describe('Challenge Redis Operations', () => {
       await expect(updateSession(null as any)).rejects.toThrow(
         'Invalid session data'
       );
-      
+
       await expect(updateSession({} as any)).rejects.toThrow(
         'Invalid session data'
       );
-      
+
       await expect(updateSession({
         sessionId: 'sess_test',
         username: '',

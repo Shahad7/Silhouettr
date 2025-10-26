@@ -18,7 +18,7 @@ export type Challenge = {
   id: string;
   shapes: Shape[];
   answer: string;
-  name: string;
+  postTitle: string;
   createdBy: string;
   createdAt: number;
   subredditName: string;
@@ -28,7 +28,7 @@ export type Challenge = {
 export type CreateChallengeRequest = {
   shapes: Shape[];
   answer: string;
-  name: string;
+  postTitle: string;
 };
 
 export type CreateChallengeResponse = {
@@ -98,13 +98,13 @@ export interface LeaderboardResponse {
 export const REDIS_KEYS = {
   // Challenge data: challenge:{postId}
   challenge: (postId: string) => `challenge:${postId}`,
-  
+
   // User sessions: session:{postId}:{username}
   userSession: (postId: string, username: string) => `session:${postId}:${username}`,
-  
+
   // Leaderboard sorted set: leaderboard:{postId}
   leaderboard: (postId: string) => `leaderboard:${postId}`,
-  
+
   // User performance data: user_stats:{postId}:{username}
   userStats: (postId: string, username: string) => `user_stats:${postId}:${username}`,
 } as const;
