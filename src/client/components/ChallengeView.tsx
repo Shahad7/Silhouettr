@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Challenge, UserSession, GuessSubmissionResponse } from '../../shared/types/api';
 import { Timer } from './Timer';
 import { AttemptCounter, PerformanceMetrics } from './AttemptCounter';
-import { challengeApi, handleApiError, isOnline, addOfflineListener } from '../utils/api';
+import { challengeApi, handleApiError, NetworkError, TimeoutError } from '../utils/api';
 
 interface ChallengeViewProps {
   postId: string;
@@ -34,24 +34,12 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
     submitting: false,
     completed: false,
     completionData: null,
-    offline: !isOnline(),
+    offline: false, // Start assuming online, detect through API errors
   });
 
-  // Load challenge data on mount and setup offline listener
+  // Load challenge data on mount
   useEffect(() => {
     loadChallenge();
-
-    // Setup offline/online listener
-    const removeOfflineListener = addOfflineListener((online) => {
-      setState(prev => ({ ...prev, offline: !online }));
-
-      // Retry loading if we come back online and had an error
-      if (online && state.error && state.retryable) {
-        loadChallenge();
-      }
-    });
-
-    return removeOfflineListener;
   }, [postId]);
 
   // Render shapes when challenge loads
@@ -63,7 +51,7 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
 
   const loadChallenge = async () => {
     try {
-      setState(prev => ({ ...prev, loading: true, error: null, retryable: false }));
+      setState(prev => ({ ...prev, loading: true, error: null, retryable: false, offline: false }));
 
       const data = await challengeApi.getChallenge(postId);
       setState(prev => ({
@@ -71,14 +59,20 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
         challenge: data.challenge,
         session: data.session || null,
         loading: false,
+        offline: false, // Successfully loaded, we're online
       }));
     } catch (error) {
       const { error: errorMessage, retryable } = handleApiError(error);
+
+      // Detect if this is a network error (likely offline)
+      const isNetworkError = error instanceof NetworkError || error instanceof TimeoutError;
+
       setState(prev => ({
         ...prev,
         loading: false,
         error: errorMessage,
         retryable,
+        offline: isNetworkError,
       }));
     }
   };
@@ -150,11 +144,16 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
       }
     } catch (error) {
       const { error: errorMessage, retryable } = handleApiError(error);
+
+      // Detect if this is a network error (likely offline)
+      const isNetworkError = error instanceof NetworkError || error instanceof TimeoutError;
+
       setState(prev => ({
         ...prev,
         submitting: false,
         error: errorMessage,
         retryable,
+        offline: isNetworkError,
       }));
     }
   };
@@ -167,6 +166,7 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
       guess: '',
       error: null,
       retryable: false,
+      offline: false, // Clear offline state when retrying
     }));
     loadChallenge();
   };

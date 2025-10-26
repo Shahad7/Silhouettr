@@ -74,9 +74,9 @@ export const Canvas: React.FC<CanvasProps> = ({
               transform: 'translate(-50%, -50%)',
               zIndex:
                 hasId &&
-                (dragging === shapeWithId.id ||
-                  resizing === shapeWithId.id ||
-                  rotating === shapeWithId.id)
+                  (dragging === shapeWithId.id ||
+                    resizing === shapeWithId.id ||
+                    rotating === shapeWithId.id)
                   ? 1000
                   : 1,
             }}
@@ -102,34 +102,51 @@ export const Canvas: React.FC<CanvasProps> = ({
                 transform: `rotate(${shape.rotation || 0}deg)`,
                 transition:
                   hasId &&
-                  (dragging === shapeWithId.id ||
-                    resizing === shapeWithId.id ||
-                    rotating === shapeWithId.id)
+                    (dragging === shapeWithId.id ||
+                      resizing === shapeWithId.id ||
+                      rotating === shapeWithId.id)
                     ? 'none'
                     : 'opacity 0.2s',
               }}
-              title={!isPlayMode ? 'Drag to move, Shift+Click to delete' : ''}
+              title={!isPlayMode ? 'Drag to move' : ''}
             >
               {shape.shape}
             </div>
-            {!isPlayMode && hasId && onMouseDown && (
+            {!isPlayMode && hasId && (
               <>
-                <div
-                  onMouseDown={(e) => onMouseDown(e, shapeWithId.id, 'resize')}
-                  className="absolute -bottom-3 -right-3 w-7 h-7 bg-blue-500 rounded-full cursor-nwse-resize opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold shadow-lg"
-                  style={{ zIndex: 1001 }}
-                  title="Drag down/up to resize"
-                >
-                  ⇕
-                </div>
-                <div
-                  onMouseDown={(e) => onMouseDown(e, shapeWithId.id, 'rotate')}
-                  className="absolute -top-3 -right-3 w-7 h-7 bg-green-500 rounded-full cursor-grab opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold shadow-lg"
-                  style={{ zIndex: 1001 }}
-                  title="Drag to rotate"
-                >
-                  ↻
-                </div>
+                {onMouseDown && (
+                  <>
+                    <div
+                      onMouseDown={(e) => onMouseDown(e, shapeWithId.id, 'resize')}
+                      className="absolute -bottom-2 -right-2 w-5 h-5 bg-blue-500 rounded-full cursor-nwse-resize opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold shadow-lg"
+                      style={{ zIndex: 1001 }}
+                      title="Drag down/up to resize"
+                    >
+                      ⇕
+                    </div>
+                    <div
+                      onMouseDown={(e) => onMouseDown(e, shapeWithId.id, 'rotate')}
+                      className="absolute -top-2 -right-2 w-5 h-5 bg-green-500 rounded-full cursor-grab opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold shadow-lg"
+                      style={{ zIndex: 1001 }}
+                      title="Drag to rotate"
+                    >
+                      ↻
+                    </div>
+                  </>
+                )}
+                {onShapeDelete && (
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onShapeDelete(shapeWithId.id);
+                    }}
+                    className="absolute -top-2 -left-2 w-5 h-5 bg-red-500 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold shadow-lg hover:bg-red-600"
+                    style={{ zIndex: 1001 }}
+                    title="Remove shape"
+                  >
+                    ✕
+                  </div>
+                )}
               </>
             )}
           </div>

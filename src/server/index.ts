@@ -1,5 +1,5 @@
 import express from 'express';
-import { ChallengeResponse, ErrorResponse, GuessSubmissionRequest, GuessSubmissionResponse, LeaderboardResponse, CreateChallengeRequest, CreateChallengeResponse, GetChallengesResponse } from '../shared/types/api';
+import { ChallengeResponse, ErrorResponse, GuessSubmissionRequest, GuessSubmissionResponse, LeaderboardResponse, CreateChallengeRequest, CreateChallengeResponse, GetChallengesResponse, InitResponse } from '../shared/types/api';
 import { redis, reddit, createServer, context, getServerPort } from '@devvit/web/server';
 import { createPost } from './core/post';
 import { getChallenge, validateGuess, getUserSession, updateSession, createChallenge, getChallengesForSubreddit } from './core/challenge';
@@ -19,42 +19,42 @@ app.set('trust proxy', 1);
 
 const router = express.Router();
 
-// router.get<{ postId: string }, InitResponse | { status: string; message: string }>(
-//   '/api/init',
-//   async (_req, res): Promise<void> => {
-//     const { postId } = context;
+router.get<{ postId: string }, InitResponse | { status: string; message: string }>(
+  '/api/init',
+  async (_req, res): Promise<void> => {
+    const { postId } = context;
 
-//     if (!postId) {
-//       console.error('API Init Error: postId not found in devvit context');
-//       res.status(400).json({
-//         status: 'error',
-//         message: 'postId is required but missing from context',
-//       });
-//       return;
-//     }
+    if (!postId) {
+      console.error('API Init Error: postId not found in devvit context');
+      res.status(400).json({
+        status: 'error',
+        message: 'postId is required but missing from context',
+      });
+      return;
+    }
 
-//     try {
-//       const [count, username] = await Promise.all([
-//         redis.get('count'),
-//         reddit.getCurrentUsername(),
-//       ]);
+    try {
+      const [count, username] = await Promise.all([
+        redis.get('count'),
+        reddit.getCurrentUsername(),
+      ]);
 
-//       res.json({
-//         type: 'init',
-//         postId: postId,
-//         count: count ? parseInt(count) : 0,
-//         username: username ?? 'anonymous',
-//       });
-//     } catch (error) {
-//       console.error(`API Init Error for post ${postId}:`, error);
-//       let errorMessage = 'Unknown error during initialization';
-//       if (error instanceof Error) {
-//         errorMessage = `Initialization failed: ${error.message}`;
-//       }
-//       res.status(400).json({ status: 'error', message: errorMessage });
-//     }
-//   }
-// );
+      res.json({
+        type: 'init',
+        postId: postId,
+        count: count ? parseInt(count) : 0,
+        username: username ?? 'anonymous',
+      });
+    } catch (error) {
+      console.error(`API Init Error for post ${postId}:`, error);
+      let errorMessage = 'Unknown error during initialization';
+      if (error instanceof Error) {
+        errorMessage = `Initialization failed: ${error.message}`;
+      }
+      res.status(400).json({ status: 'error', message: errorMessage });
+    }
+  }
+);
 
 router.post('/internal/on-app-install', async (_req, res): Promise<void> => {
   try {

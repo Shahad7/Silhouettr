@@ -13,18 +13,23 @@ const SHAPE_PALETTE: string[] = ['●', '▮', '▲', '★', '♦', '▼', '◆'
 function App() {
   // Main view state: 'menu', 'create', 'challenge', 'leaderboard'
   const [view, setView] = useState<View>('menu');
-  
+
   // Challenge mode state - always true now since we only support Reddit challenges
   const [currentPostId, setCurrentPostId] = useState<string | null>(null);
+  const [appInitialized, setAppInitialized] = useState<boolean>(false);
   // Session state is managed within ChallengeView component
 
   // Challenge creation state
   const [selectedShape, setSelectedShape] = useState<string>(SHAPE_PALETTE[0]!);
-  const [selectedSize, setSelectedSize] = useState<number>(10); // Size percentage
-  const [selectedRotation, setSelectedRotation] = useState<number>(0); // Rotation in degrees
   const [shapes, setShapes] = useState<Shape[]>([]); // Array of {id, shape, xPercent, yPercent, sizePercent, rotation}
   const [answer, setAnswer] = useState<string>('');
   const [postTitle, setPostTitle] = useState<string>('');
+  const [errors, setErrors] = useState<{
+    postTitle?: string;
+    answer?: string;
+    shapes?: string;
+  }>({});
+  const [successMessage, setSuccessMessage] = useState<string>('');
 
   // Shape manipulation hook
   const {
@@ -37,15 +42,27 @@ function App() {
     handleMouseUp,
   } = useShapeManipulation();
 
-  // Detect challenge mode from URL parameters or global context
+  // Initialize app and get postId from server context
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const postId = urlParams.get('postId') || window.location.pathname.split('/').pop();
-    
-    if (postId && postId !== 'index.html') {
-      setCurrentPostId(postId);
-      setView('challenge');
-    }
+    const initializeApp = async () => {
+      try {
+        const response = await fetch('/api/init');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.type === 'init' && data.postId) {
+            setCurrentPostId(data.postId);
+            // Don't automatically switch to challenge view - let user choose
+          }
+        }
+      } catch (error) {
+        console.error('Failed to initialize app:', error);
+        // App can still work without postId for creating challenges
+      } finally {
+        setAppInitialized(true);
+      }
+    };
+
+    initializeApp();
   }, []);
 
   // ========== CREATE CHALLENGE FUNCTIONS ==========
@@ -56,10 +73,15 @@ function App() {
       shape: selectedShape,
       xPercent: 40 + Math.random() * 20, // 40-60% of width
       yPercent: 37.5 + Math.random() * 25, // 37.5-62.5% of height
-      sizePercent: selectedSize, // Use selected size
-      rotation: selectedRotation, // Use selected rotation
+      sizePercent: 10, // Default size
+      rotation: 0, // Default rotation
     };
     setShapes((prevShapes) => [...prevShapes, newShape]);
+    // Clear any shapes error when adding a shape
+    if (errors.shapes) {
+      const { shapes, ...rest } = errors;
+      setErrors(rest);
+    }
   };
 
   const handleMouseDown = (
@@ -83,18 +105,27 @@ function App() {
   };
 
   const saveChallenge = async (): Promise<void> => {
+    // Clear previous errors
+    setErrors({});
+
+    // Validate inputs
+    const newErrors: typeof errors = {};
+
     if (!postTitle.trim()) {
-      alert('Please enter a title for your post!');
-      return;
+      newErrors.postTitle = 'Please enter a title for your post!';
     }
 
     if (!answer.trim()) {
-      alert('Please enter an answer for the challenge!');
-      return;
+      newErrors.answer = 'Please enter an answer for the challenge!';
     }
 
     if (shapes.length === 0) {
-      alert('Please add some shapes to the canvas first!');
+      newErrors.shapes = 'Please add some shapes to the canvas first!';
+    }
+
+    // If there are errors, show them and return
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
@@ -115,18 +146,18 @@ function App() {
       }
 
       const data = await response.json();
-      
+
       // Reset creator
       setShapes([]);
       setAnswer('');
       setPostTitle('');
-      setSelectedRotation(0);
-      
-      alert(`Challenge created! 🎉\nPost URL: ${data.postUrl}`);
+      setErrors({});
+
+      setSuccessMessage(`Challenge created! 🎉 Post URL: ${data.postUrl}`);
       setView('menu');
     } catch (error) {
       console.error('Error creating challenge:', error);
-      alert('Failed to create challenge. Please try again.');
+      setErrors({ shapes: 'Failed to create challenge. Please try again.' });
     }
   };
 
@@ -145,6 +176,12 @@ function App() {
   const handlePlayChallenge = (): void => {
     if (currentPostId) {
       setView('challenge');
+    } else if (!appInitialized) {
+      // Still initializing
+      return;
+    } else {
+      // This shouldn't happen in a proper Devvit context
+      console.warn('No challenge found - app may not be running in proper Reddit post context');
     }
   };
 
@@ -157,15 +194,16 @@ function App() {
       {view === 'menu' && (
         <MenuView
           onCreateClick={() => setView('create')}
-          onPlayClick={handlePlayChallenge}
+          {...(currentPostId && { onPlayClick: handlePlayChallenge })}
           {...(currentPostId && { onLeaderboardClick: handleViewLeaderboard })}
+          isInitializing={!appInitialized}
+          successMessage={successMessage}
+          onClearSuccess={() => setSuccessMessage('')}
         />
       )}
       {view === 'create' && (
         <CreateView
           selectedShape={selectedShape}
-          selectedSize={selectedSize}
-          selectedRotation={selectedRotation}
           shapes={shapes}
           answer={answer}
           postTitle={postTitle}
@@ -173,19 +211,30 @@ function App() {
           resizing={resizing}
           rotating={rotating}
           onShapeSelect={setSelectedShape}
-          onSizeChange={setSelectedSize}
-          onRotationChange={setSelectedRotation}
           onAddShape={addShape}
           onMouseMove={onMouseMove}
           onMouseUp={handleMouseUp}
           onMouseDown={handleMouseDown}
           canvasRef={canvasRef}
           onShapeDelete={deleteShape}
-          onAnswerChange={setAnswer}
-          onPostTitleChange={setPostTitle}
+          onAnswerChange={(value) => {
+            setAnswer(value);
+            if (errors.answer) {
+              const { answer, ...rest } = errors;
+              setErrors(rest);
+            }
+          }}
+          onPostTitleChange={(value) => {
+            setPostTitle(value);
+            if (errors.postTitle) {
+              const { postTitle, ...rest } = errors;
+              setErrors(rest);
+            }
+          }}
           onClearCanvas={clearCanvas}
           onSaveChallenge={saveChallenge}
           onBackToMenu={() => setView('menu')}
+          errors={errors}
         />
       )}
       {view === 'challenge' && currentPostId && (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LeaderboardEntry } from '../../shared/types/api';
-import { challengeApi, handleApiError, isOnline, addOfflineListener } from '../utils/api';
+import { challengeApi, handleApiError, NetworkError, TimeoutError } from '../utils/api';
 
 interface LeaderboardProps {
   postId: string;
@@ -22,13 +22,13 @@ interface LeaderboardState {
   lastUpdated: number;
 }
 
-export const Leaderboard: React.FC<LeaderboardProps> = ({ 
-  postId, 
+export const Leaderboard: React.FC<LeaderboardProps> = ({
+  postId,
   currentUsername,
   onBack,
   onPlayChallenge,
   onClose,
-  className = '' 
+  className = ''
 }) => {
   const [state, setState] = useState<LeaderboardState>({
     leaderboard: [],
@@ -36,30 +36,18 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
     loading: true,
     error: null,
     retryable: false,
-    offline: !isOnline(),
+    offline: false, // Start assuming online, detect through API errors
     lastUpdated: 0,
   });
 
   useEffect(() => {
     loadLeaderboard();
-    
-    // Setup offline/online listener
-    const removeOfflineListener = addOfflineListener((online) => {
-      setState(prev => ({ ...prev, offline: !online }));
-      
-      // Retry loading if we come back online and had an error
-      if (online && state.error && state.retryable) {
-        loadLeaderboard();
-      }
-    });
-    
-    return removeOfflineListener;
   }, [postId]);
 
   const loadLeaderboard = async () => {
     try {
-      setState(prev => ({ ...prev, loading: true, error: null, retryable: false }));
-      
+      setState(prev => ({ ...prev, loading: true, error: null, retryable: false, offline: false }));
+
       const data = await challengeApi.getLeaderboard(postId);
       setState(prev => ({
         ...prev,
@@ -68,14 +56,20 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
         totalPlayers: data.totalPlayers,
         loading: false,
         lastUpdated: Date.now(),
+        offline: false, // Successfully loaded, we're online
       }));
     } catch (error) {
       const { error: errorMessage, retryable } = handleApiError(error);
+
+      // Detect if this is a network error (likely offline)
+      const isNetworkError = error instanceof NetworkError || error instanceof TimeoutError;
+
       setState(prev => ({
         ...prev,
         loading: false,
         error: errorMessage,
         retryable,
+        offline: isNetworkError,
       }));
     }
   };
@@ -167,8 +161,8 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             {state.offline ? 'Offline' : 'Error'}
           </h2>
           <p className="text-red-600 mb-4">
-            {state.offline 
-              ? 'You are currently offline. Please check your internet connection.' 
+            {state.offline
+              ? 'You are currently offline. Please check your internet connection.'
               : state.error
             }
           </p>
@@ -300,9 +294,8 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                     {state.leaderboard.map((entry) => (
                       <div
                         key={`${entry.username}-${entry.completedAt}`}
-                        className={`p-4 flex items-center justify-between hover:bg-gray-50 transition-colors ${
-                          isCurrentUser(entry.username) ? 'bg-blue-50 border-l-4 border-blue-500' : ''
-                        }`}
+                        className={`p-4 flex items-center justify-between hover:bg-gray-50 transition-colors ${isCurrentUser(entry.username) ? 'bg-blue-50 border-l-4 border-blue-500' : ''
+                          }`}
                       >
                         <div className="flex items-center gap-4">
                           {/* Rank */}
@@ -310,7 +303,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                             <span className="mr-1">{getRankEmoji(entry.rank)}</span>
                             {entry.rank}
                           </div>
-                          
+
                           {/* Username */}
                           <div>
                             <div className={`font-medium text-lg ${isCurrentUser(entry.username) ? 'text-blue-700' : 'text-gray-900'}`}>
@@ -409,9 +402,8 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             {state.leaderboard.map((entry) => (
               <div
                 key={`${entry.username}-${entry.completedAt}`}
-                className={`p-3 flex items-center justify-between hover:bg-gray-50 transition-colors ${
-                  isCurrentUser(entry.username) ? 'bg-blue-50 border-l-4 border-blue-500' : ''
-                }`}
+                className={`p-3 flex items-center justify-between hover:bg-gray-50 transition-colors ${isCurrentUser(entry.username) ? 'bg-blue-50 border-l-4 border-blue-500' : ''
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   {/* Rank */}
@@ -419,7 +411,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                     <span className="mr-1">{getRankEmoji(entry.rank)}</span>
                     {entry.rank}
                   </div>
-                  
+
                   {/* Username */}
                   <div>
                     <div className={`font-medium ${isCurrentUser(entry.username) ? 'text-blue-700' : 'text-gray-900'}`}>

@@ -5,8 +5,6 @@ import { ShapeToolbar } from './ShapeToolbar';
 
 interface CreateViewProps {
   selectedShape: string;
-  selectedSize: number;
-  selectedRotation: number;
   shapes: Shape[];
   answer: string;
   postTitle: string;
@@ -14,8 +12,6 @@ interface CreateViewProps {
   resizing: string | null;
   rotating: string | null;
   onShapeSelect: (shape: string) => void;
-  onSizeChange: (size: number) => void;
-  onRotationChange: (rotation: number) => void;
   onAddShape: () => void;
   onMouseMove: (e: React.MouseEvent) => void;
   onMouseUp: () => void;
@@ -27,12 +23,15 @@ interface CreateViewProps {
   onSaveChallenge: () => void | Promise<void>;
   onBackToMenu: () => void;
   canvasRef: React.RefObject<HTMLDivElement | null>;
+  errors?: {
+    postTitle?: string;
+    answer?: string;
+    shapes?: string;
+  };
 }
 
 export const CreateView: React.FC<CreateViewProps> = ({
   selectedShape,
-  selectedSize,
-  selectedRotation,
   shapes,
   answer,
   postTitle,
@@ -40,8 +39,6 @@ export const CreateView: React.FC<CreateViewProps> = ({
   resizing,
   rotating,
   onShapeSelect,
-  onSizeChange,
-  onRotationChange,
   onAddShape,
   onMouseMove,
   onMouseUp,
@@ -53,6 +50,7 @@ export const CreateView: React.FC<CreateViewProps> = ({
   onSaveChallenge,
   onBackToMenu,
   canvasRef,
+  errors,
 }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-green-400 to-blue-500 p-4">
@@ -64,11 +62,7 @@ export const CreateView: React.FC<CreateViewProps> = ({
         {/* Shape Toolbar */}
         <ShapeToolbar
           selectedShape={selectedShape}
-          selectedSize={selectedSize}
-          selectedRotation={selectedRotation}
           onShapeSelect={onShapeSelect}
-          onSizeChange={onSizeChange}
-          onRotationChange={onRotationChange}
           onAddShape={onAddShape}
         />
 
@@ -96,8 +90,14 @@ export const CreateView: React.FC<CreateViewProps> = ({
             value={postTitle}
             onChange={(e) => onPostTitleChange(e.target.value)}
             placeholder="e.g., My First Shape Challenge, Guess This Pattern"
-            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+            className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none ${errors?.postTitle
+              ? 'border-red-500 focus:border-red-500 bg-red-50'
+              : 'border-gray-300 focus:border-blue-500'
+              }`}
           />
+          {errors?.postTitle && (
+            <p className="text-red-600 text-sm mt-1">{errors.postTitle}</p>
+          )}
         </div>
 
         {/* Answer Input */}
@@ -108,9 +108,22 @@ export const CreateView: React.FC<CreateViewProps> = ({
             value={answer}
             onChange={(e) => onAnswerChange(e.target.value)}
             placeholder="e.g., apple, star, house"
-            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+            className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none ${errors?.answer
+              ? 'border-red-500 focus:border-red-500 bg-red-50'
+              : 'border-gray-300 focus:border-blue-500'
+              }`}
           />
+          {errors?.answer && (
+            <p className="text-red-600 text-sm mt-1">{errors.answer}</p>
+          )}
         </div>
+
+        {/* Shapes Error */}
+        {errors?.shapes && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-600 text-sm">{errors.shapes}</p>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="flex gap-2 sm:gap-4">

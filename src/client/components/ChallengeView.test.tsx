@@ -11,8 +11,6 @@ vi.mock('../utils/api', () => ({
     submitGuess: vi.fn(),
   },
   handleApiError: vi.fn(),
-  isOnline: vi.fn(() => true),
-  addOfflineListener: vi.fn(() => () => {}),
 }));
 
 describe('ChallengeView', () => {
@@ -60,13 +58,13 @@ describe('ChallengeView', () => {
 
   it('should render loading state initially', () => {
     render(<ChallengeView postId="test-post" onBack={mockOnBack} />);
-    
+
     expect(screen.getByText('Loading challenge...')).toBeInTheDocument();
   });
 
   it('should load and display challenge data', async () => {
     render(<ChallengeView postId="test-post" onBack={mockOnBack} />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Test Challenge')).toBeInTheDocument();
     });
@@ -80,7 +78,7 @@ describe('ChallengeView', () => {
     vi.mocked(challengeApi.getChallenge).mockRejectedValue(mockError);
 
     render(<ChallengeView postId="test-post" onBack={mockOnBack} />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Error')).toBeInTheDocument();
     });
@@ -99,7 +97,7 @@ describe('ChallengeView', () => {
     vi.mocked(challengeApi.submitGuess).mockResolvedValue(mockSubmissionResponse);
 
     render(<ChallengeView postId="test-post" onBack={mockOnBack} />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Test Challenge')).toBeInTheDocument();
     });
@@ -131,7 +129,7 @@ describe('ChallengeView', () => {
     vi.mocked(challengeApi.submitGuess).mockResolvedValue(mockSubmissionResponse);
 
     render(<ChallengeView postId="test-post" onBack={mockOnBack} />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Test Challenge')).toBeInTheDocument();
     });
@@ -150,14 +148,14 @@ describe('ChallengeView', () => {
     expect(screen.getByText('Play Again')).toBeInTheDocument();
   });
 
-  it('should disable input when offline', async () => {
-    const { isOnline } = await import('../utils/api');
-    vi.mocked(isOnline).mockReturnValue(false);
+  it('should disable input when network error occurs', async () => {
+    const { challengeApi, NetworkError } = await import('../utils/api');
+    vi.mocked(challengeApi.getChallenge).mockRejectedValue(new NetworkError('Network connection failed'));
 
     render(<ChallengeView postId="test-post" onBack={mockOnBack} />);
-    
+
     await waitFor(() => {
-      expect(screen.getByText('Test Challenge')).toBeInTheDocument();
+      expect(screen.getByText('Offline')).toBeInTheDocument();
     });
 
     const input = screen.getByPlaceholderText('Offline - cannot submit');
@@ -169,7 +167,7 @@ describe('ChallengeView', () => {
 
   it('should call onBack when back button is clicked', async () => {
     render(<ChallengeView postId="test-post" onBack={mockOnBack} />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Test Challenge')).toBeInTheDocument();
     });
@@ -182,7 +180,7 @@ describe('ChallengeView', () => {
 
   it('should render shapes on canvas', async () => {
     render(<ChallengeView postId="test-post" onBack={mockOnBack} />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Test Challenge')).toBeInTheDocument();
     });
@@ -201,7 +199,7 @@ describe('ChallengeView', () => {
       });
 
     render(<ChallengeView postId="test-post" onBack={mockOnBack} />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Error')).toBeInTheDocument();
     });
@@ -218,7 +216,7 @@ describe('ChallengeView', () => {
 
   it('should prevent submission with empty guess', async () => {
     render(<ChallengeView postId="test-post" onBack={mockOnBack} />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Test Challenge')).toBeInTheDocument();
     });
@@ -241,7 +239,7 @@ describe('ChallengeView', () => {
     vi.mocked(challengeApi.submitGuess).mockReturnValue(submissionPromise);
 
     render(<ChallengeView postId="test-post" onBack={mockOnBack} />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Test Challenge')).toBeInTheDocument();
     });

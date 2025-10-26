@@ -4,9 +4,7 @@ import {
   ApiError,
   NetworkError,
   TimeoutError,
-  handleApiError,
-  isOnline,
-  addOfflineListener
+  handleApiError
 } from './api';
 import type {
   ChallengeResponse,
@@ -312,38 +310,5 @@ describe('handleApiError', () => {
   });
 });
 
-describe('offline detection', () => {
-  it('should detect online status', () => {
-    Object.defineProperty(navigator, 'onLine', {
-      value: true,
-      writable: true,
-    });
-
-    expect(isOnline()).toBe(true);
-  });
-
-  it('should detect offline status', () => {
-    Object.defineProperty(navigator, 'onLine', {
-      value: false,
-      writable: true,
-    });
-
-    expect(isOnline()).toBe(false);
-  });
-
-  it('should add and remove offline listeners', () => {
-    const callback = vi.fn();
-    const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
-    const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
-
-    const removeListener = addOfflineListener(callback);
-
-    expect(addEventListenerSpy).toHaveBeenCalledWith('online', expect.any(Function));
-    expect(addEventListenerSpy).toHaveBeenCalledWith('offline', expect.any(Function));
-
-    removeListener();
-
-    expect(removeEventListenerSpy).toHaveBeenCalledWith('online', expect.any(Function));
-    expect(removeEventListenerSpy).toHaveBeenCalledWith('offline', expect.any(Function));
-  });
-});
+// Note: Offline detection removed as it's not supported in Devvit environment
+// Network connectivity is now detected through API error responses

@@ -1,8 +1,8 @@
-import { 
-  ChallengeResponse, 
-  GuessSubmissionRequest, 
-  GuessSubmissionResponse, 
-  LeaderboardResponse 
+import {
+  ChallengeResponse,
+  GuessSubmissionRequest,
+  GuessSubmissionResponse,
+  LeaderboardResponse
 } from '../../shared/types/api';
 
 // API configuration
@@ -71,7 +71,7 @@ async function fetchWithTimeout(
     return response;
   } catch (error) {
     clearTimeout(timeoutId);
-    
+
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
         throw new TimeoutError();
@@ -80,7 +80,7 @@ async function fetchWithTimeout(
         throw new NetworkError();
       }
     }
-    
+
     throw error;
   }
 }
@@ -106,7 +106,7 @@ async function apiCall<T>(
       if (!response.ok) {
         const errorText = await response.text().catch(() => 'Unknown error');
         const isRetryable = response.status >= 500 || response.status === 429;
-        
+
         throw new ApiError(
           `API request failed: ${response.status} ${response.statusText} - ${errorText}`,
           response.status,
@@ -118,7 +118,7 @@ async function apiCall<T>(
       return data;
     } catch (error) {
       lastError = error instanceof Error ? error : new Error('Unknown error');
-      
+
       // Don't retry if it's the last attempt or error is not retryable
       if (attempt === retries || (error instanceof ApiError && !error.retryable)) {
         break;
@@ -179,41 +179,26 @@ export function handleApiError(error: unknown): { error: string; retryable: bool
       retryable: error.retryable,
     };
   }
-  
+
   if (error instanceof NetworkError) {
     return {
       error: 'Network connection failed. Please check your internet connection.',
       retryable: true,
     };
   }
-  
+
   if (error instanceof TimeoutError) {
     return {
       error: 'Request timed out. Please try again.',
       retryable: true,
     };
   }
-  
+
   return {
     error: error instanceof Error ? error.message : 'An unexpected error occurred',
     retryable: false,
   };
 }
 
-// Offline detection utilities
-export function isOnline(): boolean {
-  return navigator.onLine;
-}
-
-export function addOfflineListener(callback: (online: boolean) => void): () => void {
-  const handleOnline = () => callback(true);
-  const handleOffline = () => callback(false);
-  
-  window.addEventListener('online', handleOnline);
-  window.addEventListener('offline', handleOffline);
-  
-  return () => {
-    window.removeEventListener('online', handleOnline);
-    window.removeEventListener('offline', handleOffline);
-  };
-}
+// Note: Network connectivity is now detected through API error responses
+// rather than browser events, making it compatible with Devvit's sandboxed environment
