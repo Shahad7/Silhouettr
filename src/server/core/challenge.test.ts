@@ -22,7 +22,7 @@ vi.mock('@devvit/web/server', () => ({
 describe('Challenge Redis Operations', () => {
   const mockShapes: Shape[] = [
     {
-      shape: 'circle',
+      shape: '●',
       xPercent: 50,
       yPercent: 50,
       sizePercent: 20,

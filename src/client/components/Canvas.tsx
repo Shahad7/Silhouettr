@@ -49,17 +49,29 @@ export const Canvas: React.FC<CanvasProps> = ({
       onMouseMove={!isPlayMode ? onMouseMove : undefined}
       onMouseUp={!isPlayMode ? onMouseUp : undefined}
       onMouseLeave={!isPlayMode ? onMouseUp : undefined}
-      className="relative bg-white border-4 border-gray-800 rounded-lg overflow-visible w-full max-w-full"
+      onTouchMove={!isPlayMode && onMouseMove ? (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent('mousemove', {
+          clientX: touch.clientX,
+          clientY: touch.clientY,
+          bubbles: true
+        });
+        onMouseMove(mouseEvent as any);
+      } : undefined}
+      onTouchEnd={!isPlayMode ? onMouseUp : undefined}
+      className="relative bg-white border-2 border-gray-800 rounded-lg overflow-visible w-full touch-manipulation"
       style={{
-        aspectRatio: '5/4', // Maintains 500:400 ratio
-        maxWidth: '500px',
-        margin: '0 auto',
+        aspectRatio: '5/4', // Maintains 500:400 ratio (consistent across devices)
+        width: '100%',
+        height: 'auto',
       }}
     >
       {shapes.map((shape, index) => {
-        // Calculate actual size based on canvas width (responsive)
-        const fontSize = `${shape.sizePercent}vw`;
-        const maxFontSize = `${(shape.sizePercent / 100) * 500}px`; // Cap at design size
+        // Calculate consistent size based on fixed reference (400px base)
+        // This ensures uniform rendering across all devices and contexts
+        const baseSize = 400; // Fixed reference size for consistency
+        const fontSize = `${(shape.sizePercent / 100) * baseSize}px`;
 
         const shapeWithId = shape as Shape;
         const hasId = 'id' in shape;
@@ -87,12 +99,26 @@ export const Canvas: React.FC<CanvasProps> = ({
                   ? (e) => onMouseDown(e, shapeWithId.id, 'move')
                   : undefined
               }
+              onTouchStart={
+                !isPlayMode && hasId && onMouseDown
+                  ? (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const mouseEvent = new MouseEvent('mousedown', {
+                      clientX: touch.clientX,
+                      clientY: touch.clientY,
+                      bubbles: true
+                    });
+                    onMouseDown(mouseEvent as any, shapeWithId.id, 'move');
+                  }
+                  : undefined
+              }
               onClick={
                 !isPlayMode && hasId ? (e) => handleShapeClick(e, shapeWithId.id) : undefined
               }
-              className={`${!isPlayMode ? 'cursor-move hover:opacity-80' : ''}`}
+              className={`${!isPlayMode ? 'cursor-move hover:opacity-80 touch-manipulation' : ''}`}
               style={{
-                fontSize: `min(${fontSize}, ${maxFontSize})`,
+                fontSize: fontSize,
                 lineHeight: 1,
                 color: '#000000',
                 WebkitTextFillColor: '#000000',
@@ -112,43 +138,111 @@ export const Canvas: React.FC<CanvasProps> = ({
             >
               {shape.shape}
             </div>
-            {!isPlayMode && hasId && (
-              <>
-                {onMouseDown && (
-                  <>
+            {!isPlayMode && hasId && (() => {
+              // Calculate button positioning based on shape size to prevent collision
+              const shapeSize = Math.max(shape.sizePercent, 8); // Minimum 8% for button spacing
+              const buttonOffset = Math.max(shapeSize * 0.6, 12); // Dynamic offset, minimum 12px
+              const buttonSize = Math.min(Math.max(shapeSize * 0.4, 16), 24); // Dynamic size 16-24px
+
+              return (
+                <>
+                  {onMouseDown && (
+                    <>
+                      {/* Resize Button - Bottom Right */}
+                      <div
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onMouseDown(e, shapeWithId.id, 'resize');
+                        }}
+                        onTouchStart={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const touch = e.touches[0];
+                          const mouseEvent = new MouseEvent('mousedown', {
+                            clientX: touch.clientX,
+                            clientY: touch.clientY,
+                            bubbles: true
+                          });
+                          onMouseDown(mouseEvent as any, shapeWithId.id, 'resize');
+                        }}
+                        className="absolute bg-blue-500 rounded-full cursor-nwse-resize opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold shadow-lg hover:bg-blue-600 touch-manipulation"
+                        style={{
+                          bottom: `-${buttonOffset}px`,
+                          right: `-${buttonOffset}px`,
+                          width: `${buttonSize}px`,
+                          height: `${buttonSize}px`,
+                          fontSize: `${Math.max(buttonSize * 0.5, 10)}px`,
+                          zIndex: 1001
+                        }}
+                        title="Drag down/up to resize"
+                      >
+                        ⇕
+                      </div>
+
+                      {/* Rotate Button - Top Right */}
+                      <div
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onMouseDown(e, shapeWithId.id, 'rotate');
+                        }}
+                        onTouchStart={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const touch = e.touches[0];
+                          const mouseEvent = new MouseEvent('mousedown', {
+                            clientX: touch.clientX,
+                            clientY: touch.clientY,
+                            bubbles: true
+                          });
+                          onMouseDown(mouseEvent as any, shapeWithId.id, 'rotate');
+                        }}
+                        className="absolute bg-green-500 rounded-full cursor-grab opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold shadow-lg hover:bg-green-600 touch-manipulation"
+                        style={{
+                          top: `-${buttonOffset}px`,
+                          right: `-${buttonOffset}px`,
+                          width: `${buttonSize}px`,
+                          height: `${buttonSize}px`,
+                          fontSize: `${Math.max(buttonSize * 0.5, 10)}px`,
+                          zIndex: 1001
+                        }}
+                        title="Drag to rotate"
+                      >
+                        ↻
+                      </div>
+                    </>
+                  )}
+
+                  {/* Remove Button - Top Left */}
+                  {onShapeDelete && (
                     <div
-                      onMouseDown={(e) => onMouseDown(e, shapeWithId.id, 'resize')}
-                      className="absolute -bottom-2 -right-2 w-5 h-5 bg-blue-500 rounded-full cursor-nwse-resize opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold shadow-lg"
-                      style={{ zIndex: 1001 }}
-                      title="Drag down/up to resize"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onShapeDelete(shapeWithId.id);
+                      }}
+                      onTouchEnd={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onShapeDelete(shapeWithId.id);
+                      }}
+                      className="absolute bg-red-500 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold shadow-lg hover:bg-red-600 touch-manipulation"
+                      style={{
+                        top: `-${buttonOffset}px`,
+                        left: `-${buttonOffset}px`,
+                        width: `${buttonSize}px`,
+                        height: `${buttonSize}px`,
+                        fontSize: `${Math.max(buttonSize * 0.5, 10)}px`,
+                        zIndex: 1001
+                      }}
+                      title="Remove shape"
                     >
-                      ⇕
+                      ✕
                     </div>
-                    <div
-                      onMouseDown={(e) => onMouseDown(e, shapeWithId.id, 'rotate')}
-                      className="absolute -top-2 -right-2 w-5 h-5 bg-green-500 rounded-full cursor-grab opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold shadow-lg"
-                      style={{ zIndex: 1001 }}
-                      title="Drag to rotate"
-                    >
-                      ↻
-                    </div>
-                  </>
-                )}
-                {onShapeDelete && (
-                  <div
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onShapeDelete(shapeWithId.id);
-                    }}
-                    className="absolute -top-2 -left-2 w-5 h-5 bg-red-500 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold shadow-lg hover:bg-red-600"
-                    style={{ zIndex: 1001 }}
-                    title="Remove shape"
-                  >
-                    ✕
-                  </div>
-                )}
-              </>
-            )}
+                  )}
+                </>
+              );
+            })()}
           </div>
         );
       })}

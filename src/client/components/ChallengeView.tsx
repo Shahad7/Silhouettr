@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Challenge, UserSession, GuessSubmissionResponse } from '../../shared/types/api';
 import { Timer } from './Timer';
 import { AttemptCounter, PerformanceMetrics } from './AttemptCounter';
 import { challengeApi, handleApiError, NetworkError, TimeoutError } from '../utils/api';
+import { Canvas } from './Canvas';
 
 interface ChallengeViewProps {
   postId: string;
@@ -23,7 +24,6 @@ interface ChallengeState {
 }
 
 export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [state, setState] = useState<ChallengeState>({
     challenge: null,
     session: null,
@@ -42,12 +42,7 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
     loadChallenge();
   }, [postId]);
 
-  // Render shapes when challenge loads
-  useEffect(() => {
-    if (state.challenge && canvasRef.current) {
-      renderShapes();
-    }
-  }, [state.challenge]);
+  // No need for renderShapes - using Canvas component
 
   const loadChallenge = async () => {
     try {
@@ -77,38 +72,7 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
     }
   };
 
-  const renderShapes = () => {
-    const canvas = canvasRef.current;
-    if (!canvas || !state.challenge) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Set canvas size to match container
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-
-    // Render each shape
-    state.challenge.shapes.forEach(shape => {
-      const x = (shape.xPercent / 100) * canvas.width;
-      const y = (shape.yPercent / 100) * canvas.height;
-      const size = (shape.sizePercent / 100) * Math.min(canvas.width, canvas.height);
-
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate((shape.rotation * Math.PI) / 180);
-      ctx.fillStyle = '#000';
-      ctx.font = `${size}px Arial`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(shape.shape, 0, 0);
-      ctx.restore();
-    });
-  };
+  // Removed renderShapes - now using Canvas component for consistent rendering
 
   const handleGuessSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -280,23 +244,23 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
   return (
     <div className="flex flex-col h-screen">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4">
+      <div className="bg-white border-b border-gray-200 p-3">
         <div className="flex items-center justify-between">
           <button
             onClick={onBack}
-            className="text-blue-600 hover:text-blue-800 font-medium"
+            className="text-blue-600 hover:text-blue-800 font-medium text-sm"
           >
             ← Back
           </button>
-          <div className="flex flex-col items-center">
-            <h1 className="text-lg font-semibold">{state.challenge.postTitle}</h1>
+          <div className="flex flex-col items-center flex-1 mx-3">
+            <h1 className="text-base font-semibold text-center truncate max-w-full">{state.challenge.postTitle}</h1>
             {state.offline && (
-              <span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded">
+              <span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded mt-1">
                 Offline
               </span>
             )}
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 text-sm">
             <Timer
               {...(state.session?.startTime && { startTime: state.session.startTime })}
               isRunning={!state.completed && !!state.session && !state.offline}
@@ -307,22 +271,21 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
       </div>
 
       {/* Canvas Area */}
-      <div className="flex-1 flex items-center justify-center p-4 bg-gray-50">
-        <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full">
-          <canvas
-            ref={canvasRef}
-            className="w-full h-64 border border-gray-300 rounded"
-            style={{ aspectRatio: '16/9' }}
+      <div className="flex-1 flex items-center justify-center p-3 bg-gray-50 min-h-0">
+        <div className="bg-white rounded-lg shadow-lg p-4 w-full max-w-md">
+          <Canvas
+            shapes={state.challenge.shapes}
+            isPlayMode={true}
           />
         </div>
       </div>
 
       {/* Guess Input */}
-      <div className="bg-white border-t border-gray-200 p-4">
+      <div className="bg-white border-t border-gray-200 p-3">
         <form onSubmit={handleGuessSubmit} className="max-w-md mx-auto">
           {state.error && !state.loading && (
-            <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded text-center">
-              <p className="text-sm text-red-600">{state.error}</p>
+            <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded text-center">
+              <p className="text-xs text-red-600">{state.error}</p>
               {state.retryable && (
                 <button
                   type="button"
@@ -339,22 +302,22 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
               type="text"
               value={state.guess}
               onChange={(e) => setState(prev => ({ ...prev, guess: e.target.value }))}
-              placeholder={state.offline ? "Offline - cannot submit" : "What do you see in the shapes?"}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+              placeholder={state.offline ? "Offline" : "Your guess..."}
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 text-sm"
               disabled={state.submitting || state.offline}
             />
             <button
               type="submit"
               disabled={!state.guess.trim() || state.submitting || state.offline}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm font-medium"
             >
-              {state.submitting ? 'Submitting...' : state.offline ? 'Offline' : 'Submit'}
+              {state.submitting ? 'Sending...' : state.offline ? 'Offline' : 'Submit'}
             </button>
           </div>
           <p className="text-xs text-gray-500 mt-2 text-center">
             {state.offline
-              ? "You need an internet connection to submit guesses"
-              : "Look at the shapes and guess what they represent!"
+              ? "Need internet connection"
+              : "What do you see?"
             }
           </p>
         </form>

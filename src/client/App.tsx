@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MenuView, CreateView, ChallengeView, Leaderboard } from './components';
 import { useShapeManipulation } from './hooks/useShapeManipulation';
 import { Shape, View, HandleType } from './types';
+import { navigateTo } from '@devvit/web/client';
 // UserSession is managed within ChallengeView component
 
 // Utility function to generate unique IDs
@@ -153,8 +154,13 @@ function App() {
       setPostTitle('');
       setErrors({});
 
-      setSuccessMessage(`Challenge created! 🎉 Post URL: ${data.postUrl}`);
-      setView('menu');
+      // Navigate to the newly created post using Devvit's navigation
+      if (data.postUrl) {
+        navigateTo(data.postUrl);
+      } else {
+        setSuccessMessage('Challenge created! 🎉');
+        setView('menu');
+      }
     } catch (error) {
       console.error('Error creating challenge:', error);
       setErrors({ shapes: 'Failed to create challenge. Please try again.' });

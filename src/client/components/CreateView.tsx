@@ -53,10 +53,10 @@ export const CreateView: React.FC<CreateViewProps> = ({
   errors,
 }) => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-green-400 to-blue-500 p-4">
-      <div className="bg-white rounded-3xl shadow-2xl p-4 sm:p-8 max-w-3xl w-full">
-        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6 text-gray-800">
-          ✏️ Create Your Challenge
+    <div className="flex flex-col h-screen bg-gradient-to-br from-green-400 to-blue-500 p-3 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-2xl p-4 flex-1 flex flex-col w-full max-w-2xl mx-auto min-h-0">
+        <h2 className="text-lg font-bold text-center mb-3 text-gray-800 flex-shrink-0">
+          ✏️ Create Challenge
         </h2>
 
         {/* Shape Toolbar */}
@@ -67,86 +67,91 @@ export const CreateView: React.FC<CreateViewProps> = ({
         />
 
         {/* Canvas */}
-        <div className="mb-4 sm:mb-6">
-          <Canvas
-            shapes={shapes}
-            isPlayMode={false}
-            dragging={dragging}
-            resizing={resizing}
-            rotating={rotating}
-            onMouseMove={onMouseMove}
-            onMouseUp={onMouseUp}
-            onMouseDown={onMouseDown}
-            onShapeDelete={onShapeDelete}
-            canvasRef={canvasRef}
-          />
-        </div>
-
-        {/* Post Title Input */}
-        <div className="mb-4 sm:mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Post Title:</label>
-          <input
-            type="text"
-            value={postTitle}
-            onChange={(e) => onPostTitleChange(e.target.value)}
-            placeholder="e.g., My First Shape Challenge, Guess This Pattern"
-            className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none ${errors?.postTitle
-              ? 'border-red-500 focus:border-red-500 bg-red-50'
-              : 'border-gray-300 focus:border-blue-500'
-              }`}
-          />
-          {errors?.postTitle && (
-            <p className="text-red-600 text-sm mt-1">{errors.postTitle}</p>
-          )}
-        </div>
-
-        {/* Answer Input */}
-        <div className="mb-4 sm:mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Correct Answer:</label>
-          <input
-            type="text"
-            value={answer}
-            onChange={(e) => onAnswerChange(e.target.value)}
-            placeholder="e.g., apple, star, house"
-            className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none ${errors?.answer
-              ? 'border-red-500 focus:border-red-500 bg-red-50'
-              : 'border-gray-300 focus:border-blue-500'
-              }`}
-          />
-          {errors?.answer && (
-            <p className="text-red-600 text-sm mt-1">{errors.answer}</p>
-          )}
-        </div>
-
-        {/* Shapes Error */}
-        {errors?.shapes && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-600 text-sm">{errors.shapes}</p>
+        <div className="flex-1 flex items-center justify-center mb-3 min-h-0">
+          <div className="w-full max-w-md">
+            <Canvas
+              shapes={shapes}
+              isPlayMode={false}
+              dragging={dragging}
+              resizing={resizing}
+              rotating={rotating}
+              onMouseMove={onMouseMove}
+              onMouseUp={onMouseUp}
+              onMouseDown={onMouseDown}
+              onShapeDelete={onShapeDelete}
+              canvasRef={canvasRef}
+            />
           </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="flex gap-2 sm:gap-4">
-          <button
-            onClick={onClearCanvas}
-            className="flex-1 bg-gray-300 text-gray-700 py-2 sm:py-3 px-4 sm:px-6 rounded-lg font-semibold hover:bg-gray-400 transition text-sm sm:text-base"
-          >
-            Clear All
-          </button>
-          <button
-            onClick={onSaveChallenge}
-            className="flex-1 bg-green-500 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg font-semibold hover:bg-green-600 transition text-sm sm:text-base"
-          >
-            💾 Save Challenge
-          </button>
         </div>
 
-        <button
-          onClick={onBackToMenu}
-          className="w-full mt-4 bg-gray-700 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg font-semibold hover:bg-gray-800 transition text-sm sm:text-base"
-        >
-          ← Back to Menu
-        </button>
+        {/* Input Section */}
+        <div className="flex-shrink-0 space-y-2">
+          {/* Post Title Input */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Post Title:</label>
+            <input
+              type="text"
+              value={postTitle}
+              onChange={(e) => onPostTitleChange(e.target.value)}
+              placeholder="My Shape Challenge"
+              className={`w-full px-3 py-2 border-2 rounded-lg focus:outline-none text-sm ${errors?.postTitle
+                ? 'border-red-500 focus:border-red-500 bg-red-50'
+                : 'border-gray-300 focus:border-blue-500'
+                }`}
+            />
+            {errors?.postTitle && (
+              <p className="text-red-600 text-xs mt-1">{errors.postTitle}</p>
+            )}
+          </div>
+
+          {/* Answer Input */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Correct Answer:</label>
+            <input
+              type="text"
+              value={answer}
+              onChange={(e) => onAnswerChange(e.target.value)}
+              placeholder="house, star, etc."
+              className={`w-full px-3 py-2 border-2 rounded-lg focus:outline-none text-sm ${errors?.answer
+                ? 'border-red-500 focus:border-red-500 bg-red-50'
+                : 'border-gray-300 focus:border-blue-500'
+                }`}
+            />
+            {errors?.answer && (
+              <p className="text-red-600 text-xs mt-1">{errors.answer}</p>
+            )}
+          </div>
+
+          {/* Shapes Error */}
+          {errors?.shapes && (
+            <div className="p-2 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-xs">{errors.shapes}</p>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={onClearCanvas}
+              className="flex-1 bg-gray-300 text-gray-700 py-2 px-3 rounded-lg font-medium hover:bg-gray-400 transition text-sm"
+            >
+              Clear
+            </button>
+            <button
+              onClick={onSaveChallenge}
+              className="flex-1 bg-green-500 text-white py-2 px-3 rounded-lg font-medium hover:bg-green-600 transition text-sm"
+            >
+              💾 Save
+            </button>
+          </div>
+
+          <button
+            onClick={onBackToMenu}
+            className="w-full mt-2 bg-gray-700 text-white py-2 px-3 rounded-lg font-medium hover:bg-gray-800 transition text-sm"
+          >
+            ← Back
+          </button>
+        </div>
       </div>
     </div>
   );

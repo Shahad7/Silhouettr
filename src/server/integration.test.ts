@@ -95,9 +95,9 @@ describe('Complete User Journey Integration Tests', () => {
     mockChallenge = {
       id: 'challenge_123',
       shapes: [
-        { shape: 'circle', xPercent: 30, yPercent: 40, sizePercent: 15, rotation: 0 },
-        { shape: 'rectangle', xPercent: 50, yPercent: 60, sizePercent: 20, rotation: 45 },
-        { shape: 'triangle', xPercent: 70, yPercent: 30, sizePercent: 12, rotation: 0 }
+        { shape: '▲', xPercent: 50, yPercent: 25, sizePercent: 18, rotation: 0 },
+        { shape: '▮', xPercent: 50, yPercent: 55, sizePercent: 25, rotation: 0 },
+        { shape: '●', xPercent: 45, yPercent: 50, sizePercent: 8, rotation: 0 }
       ],
       answer: 'house',
       postTitle: 'Welcome to Shape Guess Challenge!',

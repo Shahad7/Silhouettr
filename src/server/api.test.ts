@@ -332,8 +332,8 @@ describe('API Endpoints Integration Tests', () => {
     mockChallenge = {
       id: 'challenge_123',
       shapes: [
-        { shape: 'circle', xPercent: 30, yPercent: 40, sizePercent: 15, rotation: 0 },
-        { shape: 'rectangle', xPercent: 50, yPercent: 60, sizePercent: 20, rotation: 45 },
+        { shape: '▲', xPercent: 50, yPercent: 25, sizePercent: 18, rotation: 0 },
+        { shape: '▮', xPercent: 50, yPercent: 55, sizePercent: 25, rotation: 0 },
       ],
       answer: 'house',
       postTitle: 'Test Challenge',
