@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Challenge, UserSession, GuessSubmissionResponse } from '../../shared/types/api';
 import { Timer } from './Timer';
-import { AttemptCounter, PerformanceMetrics } from './AttemptCounter';
+import { AttemptCounter } from './AttemptCounter';
+import { PerformanceMetrics } from './PerformanceMetrics';
 import { challengeApi, handleApiError, NetworkError, TimeoutError } from '../utils/api';
 import { Canvas } from './Canvas';
 import { FullscreenLoader } from './LoadingSpinner';
@@ -136,188 +137,184 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
     loadChallenge();
   };
 
-  // Loading state
-  if (state.loading) {
-    return <FullscreenLoader message="Loading challenge..." />;
-  }
-
-  // Error state
-  if (state.error) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md w-full text-center">
-          <h2 className="text-lg font-semibold text-red-800 mb-2">
-            {state.offline ? 'Offline' : 'Error'}
-          </h2>
-          <p className="text-red-600 mb-4">
-            {state.offline
-              ? 'You are currently offline. Please check your internet connection.'
-              : state.error
-            }
-          </p>
-          <div className="flex gap-2 justify-center">
-            {(state.retryable || state.offline) && (
-              <button
-                onClick={loadChallenge}
-                disabled={state.offline}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-              >
-                {state.offline ? 'Waiting for connection...' : 'Retry'}
-              </button>
-            )}
-            <button
-              onClick={onBack}
-              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
-            >
-              Back
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // No challenge found
-  if (!state.challenge) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-md w-full text-center">
-          <h2 className="text-lg font-semibold text-yellow-800 mb-2">No Challenge Found</h2>
-          <p className="text-yellow-600 mb-4">This post doesn't have a challenge yet.</p>
-          <button
-            onClick={onBack}
-            className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors"
-          >
-            Back
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Completion state
-  if (state.completed && state.completionData) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <div className="bg-green-50 border border-green-200 rounded-lg p-6 max-w-md w-full text-center">
-          <h2 className="text-2xl font-bold text-green-800 mb-4">🎉 Congratulations!</h2>
-          <p className="text-green-700 mb-2">You solved the challenge!</p>
-          <div className="mb-4">
-            <PerformanceMetrics
-              attempts={state.completionData.attempts}
-              timeElapsed={state.completionData.timeElapsed || 0}
-              completed={true}
-              {...(state.completionData.leaderboardPosition && {
-                leaderboardPosition: state.completionData.leaderboardPosition
-              })}
-            />
-            <div className="mt-3 p-3 bg-gray-50 rounded text-center">
-              <p className="text-sm text-gray-700">
-                <strong>Answer:</strong> {state.challenge.answer}
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2 justify-center">
-            <button
-              onClick={handleRetry}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-            >
-              Play Again
-            </button>
-            <button
-              onClick={onBack}
-              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
-            >
-              Back
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Main challenge view
   return (
-    <div className="flex flex-col h-screen">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-3">
-        <div className="flex items-center justify-between">
-          <button
-            onClick={onBack}
-            className="text-blue-600 hover:text-blue-800 font-medium text-sm"
-          >
-            ← Back
-          </button>
-          <div className="flex flex-col items-center flex-1 mx-3">
-            <h1 className="text-base font-semibold text-center truncate max-w-full">{state.challenge.postTitle}</h1>
-            {state.offline && (
-              <span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded mt-1">
-                Offline
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <Timer
-              {...(state.session?.startTime && { startTime: state.session.startTime })}
-              isRunning={!state.completed && !!state.session && !state.offline}
-            />
-            <AttemptCounter attempts={state.session?.attempts || 0} />
-          </div>
-        </div>
-      </div>
+    <>
+      {/* Loading state */}
+      {state.loading && <FullscreenLoader message="Loading challenge..." />}
 
-      {/* Canvas Area */}
-      <div className="flex-1 flex items-center justify-center p-3 bg-gray-50 min-h-0">
-        <div className="bg-white rounded-lg shadow-lg p-4 w-full max-w-md">
-          <Canvas
-            shapes={state.challenge.shapes}
-            isPlayMode={true}
-          />
-        </div>
-      </div>
-
-      {/* Guess Input */}
-      <div className="bg-white border-t border-gray-200 p-3">
-        <form onSubmit={handleGuessSubmit} className="max-w-md mx-auto">
-          {state.error && !state.loading && (
-            <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded text-center">
-              <p className="text-xs text-red-600">{state.error}</p>
-              {state.retryable && (
+      {/* Error state */}
+      {state.error && (
+        <div className="flex flex-col items-center justify-center min-h-screen p-4">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md w-full text-center">
+            <h2 className="text-lg font-semibold text-red-800 mb-2">
+              {state.offline ? 'Offline' : 'Error'}
+            </h2>
+            <p className="text-red-600 mb-4">
+              {state.offline
+                ? 'You are currently offline. Please check your internet connection.'
+                : state.error
+              }
+            </p>
+            <div className="flex gap-2 justify-center">
+              {(state.retryable || state.offline) && (
                 <button
-                  type="button"
-                  onClick={() => setState(prev => ({ ...prev, error: null }))}
-                  className="text-xs text-red-700 underline mt-1"
+                  onClick={loadChallenge}
+                  disabled={state.offline}
+                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
-                  Dismiss
+                  {state.offline ? 'Waiting for connection...' : 'Retry'}
                 </button>
               )}
+              <button
+                onClick={onBack}
+                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+              >
+                Back
+              </button>
             </div>
-          )}
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={state.guess}
-              onChange={(e) => setState(prev => ({ ...prev, guess: e.target.value }))}
-              placeholder={state.offline ? "Offline" : "Your guess..."}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 text-sm"
-              disabled={state.submitting || state.offline}
-            />
+          </div>
+        </div>
+      )}
+
+      {/* No challenge found */}
+      {!state.loading && !state.error && !state.challenge && (
+        <div className="flex flex-col items-center justify-center min-h-screen p-4">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-md w-full text-center">
+            <h2 className="text-lg font-semibold text-yellow-800 mb-2">No Challenge Found</h2>
+            <p className="text-yellow-600 mb-4">This post doesn't have a challenge yet.</p>
             <button
-              type="submit"
-              disabled={!state.guess.trim() || state.submitting || state.offline}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+              onClick={onBack}
+              className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors"
             >
-              {state.submitting ? 'Sending...' : state.offline ? 'Offline' : 'Submit'}
+              Back
             </button>
           </div>
-          <p className="text-xs text-gray-500 mt-2 text-center">
-            {state.offline
-              ? "Need internet connection"
-              : "What do you see?"
-            }
-          </p>
-        </form>
-      </div>
-    </div>
+        </div>
+      )}
+
+      {/* Completion state */}
+      {!state.loading && !state.error && state.challenge && state.completed && state.completionData && (
+        <div className="flex flex-col items-center justify-center min-h-screen p-4">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-6 max-w-md w-full text-center">
+            <h2 className="text-2xl font-bold text-green-800 mb-4">🎉 Congratulations!</h2>
+            <p className="text-green-700 mb-2">You solved the challenge!</p>
+            <div className="mb-4">
+              <PerformanceMetrics
+                attempts={state.completionData.attempts}
+                timeElapsed={state.completionData.timeElapsed || 0}
+                completed={true}
+                {...(state.completionData.leaderboardPosition && {
+                  leaderboardPosition: state.completionData.leaderboardPosition
+                })}
+              />
+              <div className="mt-3 p-3 bg-gray-50 rounded text-center">
+                <p className="text-sm text-gray-700">
+                  <strong>Answer:</strong> {state.challenge.answer}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2 justify-center">
+              <button
+                onClick={handleRetry}
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+              >
+                Play Again
+              </button>
+              <button
+                onClick={onBack}
+                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+              >
+                Back
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main challenge view */}
+      {!state.loading && !state.error && state.challenge && !state.completed && (
+        <div className="flex flex-col h-screen">
+          {/* Header */}
+          <div className="bg-white border-b border-gray-200 p-3">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={onBack}
+                className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+              >
+                ← Back
+              </button>
+              <div className="flex flex-col items-center flex-1 mx-3">
+                <h1 className="text-base font-semibold text-center truncate max-w-full">{state.challenge.postTitle}</h1>
+                {state.offline && (
+                  <span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded mt-1">
+                    Offline
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Timer
+                  {...(state.session?.startTime && { startTime: state.session.startTime })}
+                  isRunning={!state.completed && !!state.session && !state.offline}
+                />
+                <AttemptCounter attempts={state.session?.attempts || 0} />
+              </div>
+            </div>
+          </div>
+
+          {/* Canvas Area */}
+          <div className="flex-1 flex items-center justify-center p-3 bg-gray-50 min-h-0">
+            <div className="bg-white rounded-lg shadow-lg p-4 w-full max-w-md">
+              <Canvas
+                shapes={state.challenge.shapes}
+                isPlayMode={true}
+              />
+            </div>
+          </div>
+
+          {/* Guess Input */}
+          <div className="bg-white border-t border-gray-200 p-3">
+            <form onSubmit={handleGuessSubmit} className="max-w-md mx-auto">
+              {state.error && !state.loading && (
+                <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded text-center">
+                  <p className="text-xs text-red-600">{state.error}</p>
+                  {state.retryable && (
+                    <button
+                      type="button"
+                      onClick={() => setState(prev => ({ ...prev, error: null }))}
+                      className="text-xs text-red-700 underline mt-1"
+                    >
+                      Dismiss
+                    </button>
+                  )}
+                </div>
+              )}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={state.guess}
+                  onChange={(e) => setState(prev => ({ ...prev, guess: e.target.value }))}
+                  placeholder={state.offline ? "Offline" : "Your guess..."}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 text-sm"
+                  disabled={state.submitting || state.offline}
+                />
+                <button
+                  type="submit"
+                  disabled={!state.guess.trim() || state.submitting || state.offline}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                >
+                  {state.submitting ? 'Sending...' : state.offline ? 'Offline' : 'Submit'}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                {state.offline
+                  ? "Need internet connection"
+                  : "What do you see?"
+                }
+              </p>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
   );
 };

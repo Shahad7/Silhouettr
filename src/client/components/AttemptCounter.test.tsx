@@ -1,39 +1,40 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { AttemptCounter, PerformanceMetrics } from './AttemptCounter';
+import { AttemptCounter } from './AttemptCounter';
+import { PerformanceMetrics } from './PerformanceMetrics';
 
 describe('AttemptCounter', () => {
   it('should display attempt count', () => {
     render(<AttemptCounter attempts={5} />);
-    
+
     expect(screen.getByText('5')).toBeInTheDocument();
     expect(screen.getByText('attempts')).toBeInTheDocument();
   });
 
   it('should handle zero attempts', () => {
     render(<AttemptCounter attempts={0} />);
-    
+
     expect(screen.getByText('0')).toBeInTheDocument();
     expect(screen.getByText('attempts')).toBeInTheDocument();
   });
 
   it('should handle singular attempt', () => {
     render(<AttemptCounter attempts={1} />);
-    
+
     expect(screen.getByText('1')).toBeInTheDocument();
     expect(screen.getByText('attempt')).toBeInTheDocument(); // singular
   });
 
   it('should apply custom className', () => {
     render(<AttemptCounter attempts={3} className="custom-class" />);
-    
+
     const container = screen.getByText('3').closest('div');
     expect(container).toHaveClass('custom-class');
   });
 
   it('should display large numbers correctly', () => {
     render(<AttemptCounter attempts={999} />);
-    
+
     expect(screen.getByText('999')).toBeInTheDocument();
     expect(screen.getByText('attempts')).toBeInTheDocument();
   });
@@ -49,7 +50,7 @@ describe('PerformanceMetrics', () => {
         leaderboardPosition={5}
       />
     );
-    
+
     expect(screen.getByText('3')).toBeInTheDocument();
     expect(screen.getByText('attempts')).toBeInTheDocument();
     expect(screen.getByText('2:05')).toBeInTheDocument(); // 125 seconds = 2:05
@@ -64,7 +65,7 @@ describe('PerformanceMetrics', () => {
         completed={false}
       />
     );
-    
+
     expect(screen.getByText('2')).toBeInTheDocument();
     expect(screen.getByText('attempts')).toBeInTheDocument();
     expect(screen.getByText('0:45')).toBeInTheDocument();
@@ -79,7 +80,7 @@ describe('PerformanceMetrics', () => {
         completed={true}
       />
     );
-    
+
     expect(screen.getByText('0:00')).toBeInTheDocument();
   });
 
@@ -91,9 +92,9 @@ describe('PerformanceMetrics', () => {
         completed={true}
       />
     );
-    
+
     expect(screen.getByText('0:05')).toBeInTheDocument();
-    
+
     rerender(
       <PerformanceMetrics
         attempts={1}
@@ -101,9 +102,9 @@ describe('PerformanceMetrics', () => {
         completed={true}
       />
     );
-    
+
     expect(screen.getByText('1:05')).toBeInTheDocument();
-    
+
     rerender(
       <PerformanceMetrics
         attempts={1}
@@ -111,7 +112,7 @@ describe('PerformanceMetrics', () => {
         completed={true}
       />
     );
-    
+
     expect(screen.getByText('61:05')).toBeInTheDocument(); // 1 hour 1 minute 5 seconds
   });
 
@@ -123,9 +124,9 @@ describe('PerformanceMetrics', () => {
         completed={true}
       />
     );
-    
+
     expect(screen.getByText('attempt')).toBeInTheDocument(); // singular
-    
+
     rerender(
       <PerformanceMetrics
         attempts={2}
@@ -133,7 +134,7 @@ describe('PerformanceMetrics', () => {
         completed={true}
       />
     );
-    
+
     expect(screen.getByText('attempts')).toBeInTheDocument(); // plural
   });
 
@@ -146,7 +147,7 @@ describe('PerformanceMetrics', () => {
         className="custom-metrics"
       />
     );
-    
+
     const container = screen.getByText('3').closest('div');
     expect(container).toHaveClass('custom-metrics');
   });
@@ -159,7 +160,7 @@ describe('PerformanceMetrics', () => {
         completed={true}
       />
     );
-    
+
     expect(screen.getByText('3')).toBeInTheDocument();
     expect(screen.getByText('1:00')).toBeInTheDocument();
     expect(screen.queryByText('#')).not.toBeInTheDocument();
@@ -174,7 +175,7 @@ describe('PerformanceMetrics', () => {
         leaderboardPosition={1}
       />
     );
-    
+
     expect(screen.getByText('#1')).toBeInTheDocument();
   });
 
@@ -187,7 +188,7 @@ describe('PerformanceMetrics', () => {
         leaderboardPosition={999}
       />
     );
-    
+
     expect(screen.getByText('#999')).toBeInTheDocument();
   });
 });

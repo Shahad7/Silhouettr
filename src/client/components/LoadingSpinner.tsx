@@ -27,17 +27,24 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   };
 
   const spinner = (
-    <div className={`animate-spin rounded-full border-b-2 border-blue-500 ${sizeClasses[size]}`} />
+    <div className={`animate-spin rounded-full border-2 border-gray-600 border-t-white ${sizeClasses[size]}`} />
   );
 
   // Fullscreen loading (for main views)
   if (variant === 'fullscreen') {
     return (
-      <div className={`flex flex-col items-center justify-center min-h-screen p-4 ${className}`}>
-        {spinner}
-        {message && (
-          <p className={`text-gray-600 mt-3 ${textSizes[size]}`}>{message}</p>
-        )}
+      <div className={`min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black flex flex-col items-center justify-center p-4 ${className}`}>
+        <div className="bg-gray-800/80 backdrop-blur-lg rounded-2xl border border-gray-700/50 p-8 w-full max-w-[360px] shadow-2xl mx-auto text-center">
+          <div className="flex justify-center mb-4">
+            <div className={`animate-spin rounded-full border-4 border-gray-600 border-t-white ${sizeClasses[size]}`} />
+          </div>
+          {message && (
+            <p className={`text-gray-300 font-medium ${textSizes[size]}`}>{message}</p>
+          )}
+          <div className="mt-4 text-xs text-gray-500">
+            Silhouettr
+          </div>
+        </div>
       </div>
     );
   }
@@ -48,7 +55,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       <div className={`flex items-center justify-center py-4 ${className}`}>
         {spinner}
         {message && (
-          <span className={`ml-2 text-gray-600 ${textSizes[size]}`}>{message}</span>
+          <span className={`ml-3 text-gray-400 ${textSizes[size]}`}>{message}</span>
         )}
       </div>
     );
@@ -59,7 +66,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     <div className={`flex items-center justify-center py-8 ${className}`}>
       {spinner}
       {message && (
-        <span className={`ml-2 text-gray-600 ${textSizes[size]}`}>{message}</span>
+        <span className={`ml-3 text-gray-400 font-medium ${textSizes[size]}`}>{message}</span>
       )}
     </div>
   );
