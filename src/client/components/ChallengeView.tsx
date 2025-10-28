@@ -4,6 +4,7 @@ import { Timer } from './Timer';
 import { AttemptCounter, PerformanceMetrics } from './AttemptCounter';
 import { challengeApi, handleApiError, NetworkError, TimeoutError } from '../utils/api';
 import { Canvas } from './Canvas';
+import { FullscreenLoader } from './LoadingSpinner';
 
 interface ChallengeViewProps {
   postId: string;
@@ -137,12 +138,7 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
 
   // Loading state
   if (state.loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
-        <p className="text-gray-600">Loading challenge...</p>
-      </div>
-    );
+    return <FullscreenLoader message="Loading challenge..." />;
   }
 
   // Error state

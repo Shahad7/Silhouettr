@@ -6,3 +6,4 @@ export { ChallengeView } from './ChallengeView';
 export { Timer, CompactTimer } from './Timer';
 export { AttemptCounter, PerformanceMetrics } from './AttemptCounter';
 export { Leaderboard, CompactLeaderboard } from './Leaderboard';
+export { LoadingSpinner, FullscreenLoader, CompactLoader, InlineLoader } from './LoadingSpinner';

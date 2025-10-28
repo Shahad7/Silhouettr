@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LeaderboardEntry } from '../../shared/types/api';
 import { challengeApi, handleApiError, NetworkError, TimeoutError } from '../utils/api';
+import { FullscreenLoader, InlineLoader, CompactLoader } from './LoadingSpinner';
 
 interface LeaderboardProps {
   postId: string;
@@ -121,12 +122,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
 
   // Full-screen loading state
   if (state.loading && onBack) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
-        <p className="text-gray-600">Loading leaderboard...</p>
-      </div>
-    );
+    return <FullscreenLoader message="Loading leaderboard..." />;
   }
 
   // Compact loading state
@@ -144,10 +140,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             </button>
           )}
         </div>
-        <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          <span className="ml-2 text-gray-600">Loading leaderboard...</span>
-        </div>
+        <InlineLoader message="Loading leaderboard..." />
       </div>
     );
   }
@@ -497,11 +490,7 @@ export const CompactLeaderboard: React.FC<CompactLeaderboardProps> = ({
     return (
       <div className={`bg-gray-50 rounded p-3 ${className}`}>
         <div className="text-sm font-medium text-gray-700 mb-2">Top Players</div>
-        <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded mb-1"></div>
-          <div className="h-4 bg-gray-200 rounded mb-1"></div>
-          <div className="h-4 bg-gray-200 rounded"></div>
-        </div>
+        <CompactLoader />
       </div>
     );
   }
