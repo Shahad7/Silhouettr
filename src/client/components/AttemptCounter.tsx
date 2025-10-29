@@ -34,17 +34,11 @@ export const AttemptCounter: React.FC<AttemptCounterProps> = ({
   };
 
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
-      <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${getBgColorClass()}`}>
-        <span className="text-gray-500">🎯</span>
-        <span className={`font-semibold ${getColorClass()}`}>
-          {attempts}
-          {maxAttempts && ` / ${maxAttempts}`}
-        </span>
-        {showAnimation && attempts > 0 && (
-          <div className="w-1 h-1 bg-current rounded-full animate-ping"></div>
-        )}
-      </div>
+    <div className={`flex items-center gap-1 ${className}`}>
+      <span className="text-xs text-gray-300">🎯</span>
+      <span className="text-xs font-bold text-white">
+        {attempts}
+      </span>
     </div>
   );
 };

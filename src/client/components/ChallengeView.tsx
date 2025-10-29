@@ -140,36 +140,33 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
   return (
     <>
       {/* Loading state */}
-      {state.loading && <FullscreenLoader message="Loading challenge..." />}
+      {state.loading && <FullscreenLoader message="Loading..." />}
 
       {/* Error state */}
       {state.error && (
-        <div className="flex flex-col items-center justify-center min-h-screen p-4">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md w-full text-center">
-            <h2 className="text-lg font-semibold text-red-800 mb-2">
+        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black p-4 flex items-center justify-center">
+          <div className="bg-gray-800/80 backdrop-blur-lg rounded-2xl border border-gray-700/50 p-3 w-full max-w-[360px] shadow-2xl mx-auto text-center">
+            <h2 className="text-sm font-bold text-white mb-1">
               {state.offline ? 'Offline' : 'Error'}
             </h2>
-            <p className="text-red-600 mb-4">
-              {state.offline
-                ? 'You are currently offline. Please check your internet connection.'
-                : state.error
-              }
+            <p className="text-gray-300 text-xs mb-3">
+              {state.offline ? 'No connection' : state.error}
             </p>
             <div className="flex gap-2 justify-center">
               {(state.retryable || state.offline) && (
                 <button
                   onClick={loadChallenge}
                   disabled={state.offline}
-                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  className="px-3 py-1 bg-red-600 text-white rounded text-xs"
                 >
-                  {state.offline ? 'Waiting for connection...' : 'Retry'}
+                  Retry
                 </button>
               )}
               <button
                 onClick={onBack}
-                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                className="px-3 py-1 bg-white text-black rounded text-xs font-bold"
               >
-                Back
+                ← Menu
               </button>
             </div>
           </div>
@@ -178,15 +175,14 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
 
       {/* No challenge found */}
       {!state.loading && !state.error && !state.challenge && (
-        <div className="flex flex-col items-center justify-center min-h-screen p-4">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-md w-full text-center">
-            <h2 className="text-lg font-semibold text-yellow-800 mb-2">No Challenge Found</h2>
-            <p className="text-yellow-600 mb-4">This post doesn't have a challenge yet.</p>
+        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black p-4 flex items-center justify-center">
+          <div className="bg-gray-800/80 backdrop-blur-lg rounded-2xl border border-gray-700/50 p-3 w-full max-w-[360px] shadow-2xl mx-auto text-center">
+            <h2 className="text-sm font-bold text-white mb-1">No Challenge</h2>
             <button
               onClick={onBack}
-              className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors"
+              className="px-3 py-1 bg-white text-black rounded text-xs font-bold mt-2"
             >
-              Back
+              ← Menu
             </button>
           </div>
         </div>
@@ -194,11 +190,11 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
 
       {/* Completion state */}
       {!state.loading && !state.error && state.challenge && state.completed && state.completionData && (
-        <div className="flex flex-col items-center justify-center min-h-screen p-4">
-          <div className="bg-green-50 border border-green-200 rounded-lg p-6 max-w-md w-full text-center">
-            <h2 className="text-2xl font-bold text-green-800 mb-4">🎉 Congratulations!</h2>
-            <p className="text-green-700 mb-2">You solved the challenge!</p>
-            <div className="mb-4">
+        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black p-4 flex items-center justify-center">
+          <div className="bg-gray-800/80 backdrop-blur-lg rounded-2xl border border-gray-700/50 p-3 w-full max-w-[360px] shadow-2xl mx-auto text-center">
+            <h2 className="text-base font-black text-white mb-2">SOLVED!</h2>
+            
+            <div className="mb-3">
               <PerformanceMetrics
                 attempts={state.completionData.attempts}
                 timeElapsed={state.completionData.timeElapsed || 0}
@@ -207,63 +203,62 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
                   leaderboardPosition: state.completionData.leaderboardPosition
                 })}
               />
-              <div className="mt-3 p-3 bg-gray-50 rounded text-center">
-                <p className="text-sm text-gray-700">
-                  <strong>Answer:</strong> {state.challenge.answer}
-                </p>
-              </div>
             </div>
-            <div className="flex gap-2 justify-center">
+            
+            <div className="flex gap-2">
               <button
                 onClick={handleRetry}
-                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                className="flex-1 py-2 bg-gray-700 text-white rounded text-xs border border-gray-600"
               >
                 Play Again
               </button>
               <button
                 onClick={onBack}
-                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                className="flex-1 py-2 bg-white text-black rounded text-xs font-bold"
               >
-                Back
+                ← Menu
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Main challenge view */}
+      {/* Main challenge view - PERFECTO WITHOUT TITLE */}
       {!state.loading && !state.error && state.challenge && !state.completed && (
-        <div className="flex flex-col h-screen">
-          {/* Header */}
-          <div className="bg-white border-b border-gray-200 p-3">
-            <div className="flex items-center justify-between">
+        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black flex flex-col">
+          {/* Header - CLEAN & BALANCED */}
+          <div className="bg-gray-800 border-b border-gray-700 p-2">
+            <div className="flex items-center justify-between max-w-[360px] mx-auto w-full gap-3">
+              {/* PROMINENT Back Button */}
               <button
                 onClick={onBack}
-                className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                className="text-black text-xs font-bold bg-white px-3 py-1 rounded hover:bg-gray-100 transition-colors flex items-center gap-1"
               >
-                ← Back
+                ← Menu
               </button>
-              <div className="flex flex-col items-center flex-1 mx-3">
-                <h1 className="text-base font-semibold text-center truncate max-w-full">{state.challenge.postTitle}</h1>
-                {state.offline && (
-                  <span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded mt-1">
-                    Offline
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2 text-sm">
+              
+              {/* Timer & Attempts - CENTER STAGE */}
+              <div className="flex items-center gap-3 bg-gray-700 px-3 py-1 rounded border border-gray-600">
                 <Timer
                   {...(state.session?.startTime && { startTime: state.session.startTime })}
                   isRunning={!state.completed && !!state.session && !state.offline}
                 />
+                <div className="w-px h-4 bg-gray-600"></div>
                 <AttemptCounter attempts={state.session?.attempts || 0} />
               </div>
+
+              {/* Offline Indicator - ONLY IF NEEDED */}
+              {state.offline && (
+                <div className="text-red-400 text-xs bg-red-400/10 px-2 py-1 rounded border border-red-400/20">
+                  Offline
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Canvas Area */}
-          <div className="flex-1 flex items-center justify-center p-3 bg-gray-50 min-h-0">
-            <div className="bg-white rounded-lg shadow-lg p-4 w-full max-w-md">
+          {/* Canvas - MAXIMUM SPACE */}
+          <div className="flex-1 flex items-center justify-center p-3 bg-gray-900 min-h-0">
+            <div className="w-full max-w-[360px] mx-auto">
               <Canvas
                 shapes={state.challenge.shapes}
                 isPlayMode={true}
@@ -271,47 +266,34 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
             </div>
           </div>
 
-          {/* Guess Input */}
-          <div className="bg-white border-t border-gray-200 p-3">
-            <form onSubmit={handleGuessSubmit} className="max-w-md mx-auto">
-              {state.error && !state.loading && (
-                <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded text-center">
-                  <p className="text-xs text-red-600">{state.error}</p>
-                  {state.retryable && (
-                    <button
-                      type="button"
-                      onClick={() => setState(prev => ({ ...prev, error: null }))}
-                      className="text-xs text-red-700 underline mt-1"
-                    >
-                      Dismiss
-                    </button>
-                  )}
+          {/* Input - PERFECT POSITION */}
+          <div className="bg-gray-800 border-t border-gray-700 p-3">
+            <div className="max-w-[360px] mx-auto w-full">
+              <form onSubmit={handleGuessSubmit}>
+                {state.error && !state.loading && (
+                  <div className="p-2 bg-red-500/10 border border-red-500/30 rounded text-center mb-2">
+                    <p className="text-xs text-red-400">{state.error}</p>
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={state.guess}
+                    onChange={(e) => setState(prev => ({ ...prev, guess: e.target.value }))}
+                    placeholder="What's in the silhouette?"
+                    className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm focus:outline-none focus:border-white disabled:bg-gray-600 placeholder-gray-400"
+                    disabled={state.submitting || state.offline}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!state.guess.trim() || state.submitting || state.offline}
+                    className="px-4 py-2 bg-white text-black rounded text-sm font-bold disabled:bg-gray-600 disabled:text-gray-400 hover:bg-gray-100 transition-colors"
+                  >
+                    Guess
+                  </button>
                 </div>
-              )}
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={state.guess}
-                  onChange={(e) => setState(prev => ({ ...prev, guess: e.target.value }))}
-                  placeholder={state.offline ? "Offline" : "Your guess..."}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 text-sm"
-                  disabled={state.submitting || state.offline}
-                />
-                <button
-                  type="submit"
-                  disabled={!state.guess.trim() || state.submitting || state.offline}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-                >
-                  {state.submitting ? 'Sending...' : state.offline ? 'Offline' : 'Submit'}
-                </button>
-              </div>
-              <p className="text-xs text-gray-500 mt-2 text-center">
-                {state.offline
-                  ? "Need internet connection"
-                  : "What do you see?"
-                }
-              </p>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       )}

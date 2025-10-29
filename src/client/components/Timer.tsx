@@ -61,18 +61,14 @@ export const Timer: React.FC<TimerProps> = ({
   };
 
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
-      <div className="flex items-center gap-1">
-        <span className="text-gray-500">⏱️</span>
-        <span className="font-mono text-lg font-semibold">
-          {formatTime(elapsedTime)}
-        </span>
-      </div>
-      {isRunning && (
-        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-      )}
+    <div className={`flex items-center gap-1 ${className}`}>
+      <span className="text-xs text-gray-300">⏱️</span>
+      <span className="font-mono text-xs font-bold text-white">
+        {formatTime(elapsedTime)}
+      </span>
     </div>
   );
+  
 };
 
 

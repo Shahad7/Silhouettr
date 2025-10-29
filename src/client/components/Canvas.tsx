@@ -60,10 +60,11 @@ export const Canvas: React.FC<CanvasProps> = ({
         onMouseMove(mouseEvent as any);
       } : undefined}
       onTouchEnd={!isPlayMode ? onMouseUp : undefined}
-      className="relative bg-white border-2 border-gray-800 rounded-lg overflow-visible w-full touch-manipulation"
+      className="relative bg-gray-900 border-2 border-gray-700 rounded-xl overflow-visible touch-manipulation mx-auto"
       style={{
         aspectRatio: '5/4', // Maintains 500:400 ratio (consistent across devices)
         width: '100%',
+        maxWidth: '500px', // Intrinsic design: fixed maximum width
         height: 'auto',
       }}
     >
@@ -116,14 +117,14 @@ export const Canvas: React.FC<CanvasProps> = ({
               onClick={
                 !isPlayMode && hasId ? (e) => handleShapeClick(e, shapeWithId.id) : undefined
               }
-              className={`${!isPlayMode ? 'cursor-move hover:opacity-80 touch-manipulation' : ''}`}
+              className={`${!isPlayMode ? 'cursor-move hover:opacity-90 touch-manipulation' : ''}`}
               style={{
                 fontSize: fontSize,
                 lineHeight: 1,
-                color: '#000000',
-                WebkitTextFillColor: '#000000',
-                textShadow: 'none',
-                filter: 'grayscale(100%) brightness(0%)',
+                color: '#ffffff', // White for better contrast on dark background
+                WebkitTextFillColor: '#ffffff',
+                textShadow: '0 0 1px rgba(0,0,0,0.5)',
+                filter: 'grayscale(100%) brightness(100%)', // White symbols on dark background
                 fontFamily: 'Arial, sans-serif',
                 transform: `rotate(${shape.rotation || 0}deg)`,
                 transition:
@@ -132,7 +133,7 @@ export const Canvas: React.FC<CanvasProps> = ({
                       resizing === shapeWithId.id ||
                       rotating === shapeWithId.id)
                     ? 'none'
-                    : 'opacity 0.2s',
+                    : 'opacity 0.2s, transform 0.2s',
               }}
               title={!isPlayMode ? 'Drag to move' : ''}
             >
@@ -166,7 +167,7 @@ export const Canvas: React.FC<CanvasProps> = ({
                           });
                           onMouseDown(mouseEvent as any, shapeWithId.id, 'resize');
                         }}
-                        className="absolute bg-blue-500 rounded-full cursor-nwse-resize opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold shadow-lg hover:bg-blue-600 touch-manipulation"
+                        className="absolute bg-gray-700 border-2 border-white rounded-full cursor-nwse-resize opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center text-white font-bold shadow-lg hover:bg-gray-600 hover:scale-110 touch-manipulation"
                         style={{
                           bottom: `-${buttonOffset}px`,
                           right: `-${buttonOffset}px`,
@@ -198,7 +199,7 @@ export const Canvas: React.FC<CanvasProps> = ({
                           });
                           onMouseDown(mouseEvent as any, shapeWithId.id, 'rotate');
                         }}
-                        className="absolute bg-green-500 rounded-full cursor-grab opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold shadow-lg hover:bg-green-600 touch-manipulation"
+                        className="absolute bg-gray-700 border-2 border-white rounded-full cursor-grab opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center text-white font-bold shadow-lg hover:bg-gray-600 hover:scale-110 touch-manipulation"
                         style={{
                           top: `-${buttonOffset}px`,
                           right: `-${buttonOffset}px`,
@@ -226,7 +227,7 @@ export const Canvas: React.FC<CanvasProps> = ({
                         e.stopPropagation();
                         onShapeDelete(shapeWithId.id);
                       }}
-                      className="absolute bg-red-500 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold shadow-lg hover:bg-red-600 touch-manipulation"
+                      className="absolute bg-red-600 border-2 border-white rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center text-white font-bold shadow-lg hover:bg-red-700 hover:scale-110 touch-manipulation"
                       style={{
                         top: `-${buttonOffset}px`,
                         left: `-${buttonOffset}px`,
@@ -247,8 +248,11 @@ export const Canvas: React.FC<CanvasProps> = ({
         );
       })}
       {shapes.length === 0 && !isPlayMode && (
-        <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-lg pointer-events-none">
-          Click "Add Shape" to start creating
+        <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-base pointer-events-none bg-gray-900/50 rounded-xl">
+          <div className="text-center">
+            <div className="text-2xl mb-2">◼️</div>
+            <p className="font-medium">Add symbols to start creating</p>
+          </div>
         </div>
       )}
     </div>
