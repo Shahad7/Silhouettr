@@ -117,30 +117,33 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
 
       {/* Error state */}
       {state.error && (
-        <div className="flex flex-col items-center justify-center min-h-screen p-4">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md w-full text-center">
-            <h2 className="text-lg font-semibold text-red-800 mb-2">
+        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black p-4 flex items-center justify-center">
+          <div className="bg-gray-800/80 backdrop-blur-lg rounded-2xl border border-gray-700/50 p-6 w-full max-w-[360px] shadow-2xl mx-auto text-center">
+            <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">⚠️</span>
+            </div>
+            <h2 className="text-lg font-bold text-white mb-2">
               {state.offline ? 'Offline' : 'Error'}
             </h2>
-            <p className="text-red-600 mb-4">
+            <p className="text-gray-300 text-sm mb-6">
               {state.offline
                 ? 'You are currently offline. Please check your internet connection.'
                 : state.error
               }
             </p>
-            <div className="flex gap-2 justify-center">
+            <div className="flex gap-3 justify-center">
               {(state.retryable || state.offline) && (
                 <button
                   onClick={loadLeaderboard}
                   disabled={state.offline}
-                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium"
                 >
-                  {state.offline ? 'Waiting for connection...' : 'Retry'}
+                  {state.offline ? 'Waiting...' : 'Retry'}
                 </button>
               )}
               <button
                 onClick={onBack}
-                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-200 text-sm font-medium border border-gray-600"
               >
                 Back
               </button>
@@ -151,23 +154,23 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
 
       {/* Main leaderboard view */}
       {!state.loading && !state.error && (
-        <div className="flex flex-col h-screen">
+        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black flex flex-col">
           {/* Header */}
-          <div className="bg-white border-b border-gray-200 p-3">
-            <div className="flex items-center justify-between">
+          <div className="bg-gray-800 border-b border-gray-700 p-4">
+            <div className="flex items-center justify-between max-w-[360px] mx-auto w-full">
               <button
                 onClick={onBack}
-                className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                className="text-gray-300 hover:text-white font-medium text-sm transition-colors flex items-center gap-1"
               >
                 ← Back
               </button>
               <div className="text-center flex-1 mx-3">
-                <h1 className="text-base font-semibold">Leaderboard</h1>
-                <p className="text-xs text-gray-600">
+                <h1 className="text-lg font-bold text-white">LEADERBOARD</h1>
+                <p className="text-xs text-gray-400 mt-1">
                   {state.totalPlayers} player{state.totalPlayers !== 1 ? 's' : ''}
                 </p>
                 {state.offline && (
-                  <span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded mt-1">
+                  <span className="text-xs text-red-400 bg-red-400/10 px-2 py-1 rounded-full mt-1 inline-block">
                     Offline
                   </span>
                 )}
@@ -176,7 +179,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                 <button
                   onClick={loadLeaderboard}
                   disabled={state.offline}
-                  className="text-blue-600 hover:text-blue-800 text-sm disabled:text-gray-400"
+                  className="text-gray-400 hover:text-white text-sm disabled:text-gray-600 transition-colors p-2 hover:bg-gray-700 rounded-lg"
                   title="Refresh leaderboard"
                 >
                   🔄
@@ -184,7 +187,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                 {onPlayChallenge && (
                   <button
                     onClick={onPlayChallenge}
-                    className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+                    className="px-3 py-1 bg-white text-gray-900 text-sm rounded-lg hover:bg-gray-100 transition-all duration-200 font-medium"
                   >
                     Play
                   </button>
@@ -195,75 +198,91 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
 
           {/* Current User Rank (if not in top entries) */}
           {state.userRank && state.userRank > 10 && currentUsername && (
-            <div className="bg-blue-50 border-b border-gray-200 p-2">
-              <div className="text-sm text-blue-700 font-medium text-center">
-                Your rank: #{state.userRank}
+            <div className="bg-blue-500/10 border-b border-gray-700 p-3">
+              <div className="max-w-[360px] mx-auto w-full">
+                <div className="text-sm text-blue-400 font-medium text-center flex items-center justify-center gap-2">
+                  <span>🎯</span>
+                  Your rank: #{state.userRank}
+                </div>
               </div>
             </div>
           )}
 
           {/* Leaderboard Entries */}
           <div className="flex-1 overflow-y-auto">
-            {state.leaderboard.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-gray-500">
-                <div className="text-center">
-                  <p className="text-base mb-1">No completions yet!</p>
-                  <p className="text-sm">Be the first to solve this challenge.</p>
-                </div>
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-100">
-                {state.leaderboard.map((entry) => (
-                  <div
-                    key={`${entry.username}-${entry.completedAt}`}
-                    className={`p-3 flex items-center justify-between hover:bg-gray-50 transition-colors ${isCurrentUser(entry.username) ? 'bg-blue-50 border-l-4 border-blue-500' : ''
-                      }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      {/* Rank */}
-                      <div className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold ${getRankColor(entry.rank)}`}>
-                        <span className="mr-1">{getRankEmoji(entry.rank)}</span>
-                        {entry.rank}
-                      </div>
-
-                      {/* Username */}
-                      <div>
-                        <div className={`font-medium text-sm ${isCurrentUser(entry.username) ? 'text-blue-700' : 'text-gray-900'}`}>
-                          {entry.username}
-                          {isCurrentUser(entry.username) && (
-                            <span className="ml-1 text-xs text-blue-600">(You)</span>
-                          )}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {formatDate(entry.completedAt)}
-                        </div>
-                      </div>
+            <div className="max-w-[360px] mx-auto w-full p-4">
+              {state.leaderboard.length === 0 ? (
+                <div className="flex items-center justify-center h-48 text-gray-400">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <span className="text-2xl">🏆</span>
                     </div>
-
-                    {/* Stats */}
-                    <div className="text-right">
-                      <div className="font-mono text-sm font-semibold text-gray-900">
-                        {formatTime(entry.completionTime)}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {entry.attempts} attempt{entry.attempts !== 1 ? 's' : ''}
-                      </div>
-                    </div>
+                    <p className="text-base font-medium mb-1">No completions yet!</p>
+                    <p className="text-sm">Be the first to solve this challenge.</p>
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {state.leaderboard.map((entry) => (
+                    <div
+                      key={`${entry.username}-${entry.completedAt}`}
+                      className={`p-4 rounded-xl border transition-all duration-200 ${isCurrentUser(entry.username)
+                          ? 'bg-blue-500/10 border-blue-500/30 shadow-lg'
+                          : 'bg-gray-800/50 border-gray-700 hover:bg-gray-700/50'
+                        }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {/* Rank */}
+                          <div className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${entry.rank === 1 ? 'bg-yellow-500/20 text-yellow-400' :
+                              entry.rank === 2 ? 'bg-gray-400/20 text-gray-300' :
+                                entry.rank === 3 ? 'bg-orange-500/20 text-orange-400' :
+                                  'bg-gray-700 text-gray-400'
+                            }`}>
+                            {entry.rank}
+                          </div>
+
+                          {/* Username */}
+                          <div>
+                            <div className={`font-medium text-sm ${isCurrentUser(entry.username) ? 'text-blue-400' : 'text-white'
+                              }`}>
+                              {entry.username}
+                              {isCurrentUser(entry.username) && (
+                                <span className="ml-2 text-xs text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded-full">
+                                  You
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              {formatDate(entry.completedAt)}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="text-right">
+                          <div className="font-mono text-sm font-bold text-white">
+                            {formatTime(entry.completionTime)}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            {entry.attempts} attempt{entry.attempts !== 1 ? 's' : ''}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Footer */}
-          <div className="bg-gray-50 border-t border-gray-200 p-2">
-            <div className="flex items-center justify-between text-xs text-gray-500">
-              <span>
-                Updated: {new Date(state.lastUpdated).toLocaleTimeString()}
-              </span>
-              <span>
-                Ranked by time + attempts
-              </span>
+          <div className="bg-gray-800 border-t border-gray-700 p-3">
+            <div className="max-w-[360px] mx-auto w-full">
+              <div className="flex items-center justify-between text-xs text-gray-400">
+                <span>Updated: {new Date(state.lastUpdated).toLocaleTimeString()}</span>
+                <span>Ranked by time + attempts</span>
+              </div>
             </div>
           </div>
         </div>
