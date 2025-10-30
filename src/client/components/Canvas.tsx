@@ -181,15 +181,8 @@ export const Canvas: React.FC<CanvasProps> = ({
             const hasId = 'id' in shape;
             if (!hasId) return null;
 
-            // Calculate button positioning
-            const baseSize = 240;
-            const symbolPixelSize = (shape.sizePercent / 100) * baseSize;
-            const symbolRadius = symbolPixelSize / 2;
-
-            // Smart button distance - minimum 25px, or symbol edge + 8px buffer
-            const minDistance = 25;
-            const edgeBuffer = 8;
-            const buttonDistance = Math.max(minDistance, symbolRadius + edgeBuffer);
+            // FIXED: Use constant button distance for all symbol sizes
+            const buttonDistance = 25; // Fixed 25px distance from center
             const buttonSize = 18;
 
             return (
@@ -200,8 +193,8 @@ export const Canvas: React.FC<CanvasProps> = ({
                   left: `${shape.xPercent}%`,
                   top: `${shape.yPercent}%`,
                   transform: 'translate(-50%, -50%)',
-                  width: `${Math.max(40, symbolPixelSize + 20)}px`,
-                  height: `${Math.max(40, symbolPixelSize + 20)}px`,
+                  width: '60px', // Fixed container size
+                  height: '60px', // Fixed container size
                   zIndex:
                     dragging === shapeWithId.id ||
                       resizing === shapeWithId.id ||
@@ -220,7 +213,7 @@ export const Canvas: React.FC<CanvasProps> = ({
               >
                 {onMouseDown && (
                   <>
-                    {/* Resize Button - Bottom Right */}
+                    {/* Resize Button - Bottom Right - FIXED POSITION */}
                     <div
                       onMouseDown={(e) => {
                         e.preventDefault();
@@ -253,7 +246,7 @@ export const Canvas: React.FC<CanvasProps> = ({
                       ⇕
                     </div>
 
-                    {/* Rotate Button - Top Right */}
+                    {/* Rotate Button - Top Right - FIXED POSITION */}
                     <div
                       onMouseDown={(e) => {
                         e.preventDefault();
@@ -288,7 +281,7 @@ export const Canvas: React.FC<CanvasProps> = ({
                   </>
                 )}
 
-                {/* Remove Button - Top Left */}
+                {/* Remove Button - Top Left - FIXED POSITION */}
                 {onShapeDelete && (
                   <div
                     onClick={(e) => {
