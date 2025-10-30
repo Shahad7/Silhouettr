@@ -30,6 +30,7 @@ export const Canvas: React.FC<CanvasProps> = ({
 }) => {
   const localCanvasRef = useRef<HTMLDivElement>(null);
   const activeCanvasRef = canvasRef || localCanvasRef;
+  const svgRef = useRef<SVGSVGElement>(null);
 
   const handleShapeClick = (e: React.MouseEvent, shapeId: string) => {
     if (
@@ -69,233 +70,253 @@ export const Canvas: React.FC<CanvasProps> = ({
   }
 
   return (
-    <div
-      ref={!isPlayMode ? activeCanvasRef : null}
-      onMouseMove={!isPlayMode ? onMouseMove : undefined}
-      onMouseUp={!isPlayMode ? onMouseUp : undefined}
-      onMouseLeave={!isPlayMode ? onMouseUp : undefined}
-      onTouchMove={!isPlayMode && onMouseMove ? (e) => {
-        e.preventDefault();
-        const touch = e.touches[0];
-        if (!touch) return;
-        const mouseEvent = new MouseEvent('mousemove', {
-          clientX: touch.clientX,
-          clientY: touch.clientY,
-          bubbles: true
-        });
-        onMouseMove(mouseEvent as any);
-      } : undefined}
-      onTouchEnd={!isPlayMode ? onMouseUp : undefined}
-      className="relative bg-gray-100 border-2 border-gray-800 rounded-lg overflow-visible touch-manipulation mx-auto"
-      style={{
-        width: '300px',  // FIXED WIDTH - exactly the same everywhere, fits all mobile devices
-        height: '240px', // FIXED HEIGHT - exactly the same everywhere (300 * 4/5 = 240)
-      }}
-    >
-      {shapes.map((shape, index) => {
-        // CRITICAL: Fixed baseSize matches the fixed canvas height for perfect consistency
-        // Canvas is ALWAYS 300x240px in both CreateView and ChallengeView
-        // This ensures shapes render at exactly the same size and positions everywhere
-        const baseSize = 240; // Fixed reference size matching canvas height
-        const fontSize = `${(shape.sizePercent / 100) * baseSize}px`;
+    <div className="relative mx-auto" style={{ width: '300px', height: '240px' }}>
+      {/* SVG Canvas - Fixed coordinate system */}
+      <svg
+        ref={svgRef}
+        width="300"
+        height="240"
+        viewBox="0 0 300 240"
+        className="border-2 border-gray-800 rounded-lg bg-gray-100"
+        style={{
+          width: '300px',
+          height: '240px',
+        }}
+      >
+        {/* Background */}
+        <rect width="300" height="240" fill="#f3f4f6" />
 
-        const shapeWithId = shape as Shape;
-        const hasId = 'id' in shape;
+        {/* Render shapes */}
+        {shapes.map((shape, index) => {
+          const baseSize = 240; // Fixed reference size
+          const fontSize = (shape.sizePercent / 100) * baseSize;
+          const x = (shape.xPercent / 100) * 300;
+          const y = (shape.yPercent / 100) * 240;
 
-        return (
-          <div
-            key={hasId ? shapeWithId.id : index}
-            className={`absolute select-none ${!isPlayMode ? 'group' : ''}`}
-            style={{
-              left: `${shape.xPercent}%`,
-              top: `${shape.yPercent}%`,
-              transform: 'translate(-50%, -50%)',
-              zIndex:
-                hasId &&
-                  (dragging === shapeWithId.id ||
-                    resizing === shapeWithId.id ||
-                    rotating === shapeWithId.id)
-                  ? 1000
-                  : 1,
-            }}
-          >
-            <div
+          const shapeWithId = shape as Shape;
+          const hasId = 'id' in shape;
+          const shapeKey = hasId ? shapeWithId.id : index;
+
+          return (
+            <text
+              key={shapeKey}
+              x={x}
+              y={y}
+              fontSize={fontSize}
+              fontFamily="Arial, sans-serif"
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill={shape.color === 'black' ? '#000000' : '#ffffff'}
+              stroke={shape.color === 'black' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)'}
+              strokeWidth="1"
+              transform={shape.rotation ? `rotate(${shape.rotation} ${x} ${y})` : undefined}
+              style={{
+                cursor: !isPlayMode ? 'move' : 'default',
+                userSelect: 'none',
+              }}
               onMouseDown={
-                !isPlayMode && hasId && onMouseDown
-                  ? (e) => onMouseDown(e, shapeWithId.id, 'move')
-                  : undefined
-              }
-              onTouchStart={
                 !isPlayMode && hasId && onMouseDown
                   ? (e) => {
                     e.preventDefault();
-                    const touch = e.touches[0];
-                    if (!touch) return;
-                    const mouseEvent = new MouseEvent('mousedown', {
-                      clientX: touch.clientX,
-                      clientY: touch.clientY,
-                      bubbles: true
-                    });
-                    onMouseDown(mouseEvent as any, shapeWithId.id, 'move');
+                    onMouseDown(e as any, shapeWithId.id, 'move');
                   }
                   : undefined
               }
               onClick={
-                !isPlayMode && hasId ? (e) => handleShapeClick(e, shapeWithId.id) : undefined
+                !isPlayMode && hasId
+                  ? (e) => handleShapeClick(e as any, shapeWithId.id)
+                  : undefined
               }
-              className={`${!isPlayMode ? 'cursor-move hover:opacity-90 touch-manipulation' : ''}`}
-              style={{
-                fontSize: fontSize,
-                lineHeight: 1,
-                color: shape.color === 'black' ? '#000000' : '#ffffff',
-                WebkitTextFillColor: shape.color === 'black' ? '#000000' : '#ffffff',
-                textShadow: shape.color === 'black' ? '0 0 1px rgba(255,255,255,0.8)' : '0 0 2px rgba(0,0,0,0.8)',
-                fontFamily: 'Arial, sans-serif',
-                transform: `rotate(${shape.rotation || 0}deg)`,
-                transition:
-                  hasId &&
-                    (dragging === shapeWithId.id ||
-                      resizing === shapeWithId.id ||
-                      rotating === shapeWithId.id)
-                    ? 'none'
-                    : 'opacity 0.2s, transform 0.2s',
-                // Add padding to make drag area larger
-                padding: !isPlayMode ? '8px' : '0',
-                minWidth: !isPlayMode ? '24px' : 'auto',
-                minHeight: !isPlayMode ? '24px' : 'auto',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-              title={!isPlayMode ? 'Drag to move, Shift+Click to delete' : ''}
             >
               {shape.shape}
-            </div>
-            {!isPlayMode && hasId && (() => {
-              // SMART button positioning - stay close to symbol edges but maintain minimum distances
-              // Calculate symbol's approximate visual size
-              const baseSize = 240;
-              const symbolPixelSize = (shape.sizePercent / 100) * baseSize;
-              const symbolRadius = symbolPixelSize / 2;
+            </text>
+          );
+        })}
 
-              // Position buttons near symbol edges with minimum spacing
-              // For small symbols: use minimum distance to prevent overlap
-              // For large symbols: position at symbol edge + small buffer
-              const minDistance = 25; // Minimum distance to prevent button overlap
-              const edgeBuffer = 8; // Small buffer from symbol edge
-              const buttonDistance = Math.max(minDistance, symbolRadius + edgeBuffer);
+        {/* Empty state text */}
+        {shapes.length === 0 && !isPlayMode && (
+          <text
+            x="150"
+            y="120"
+            fontSize="16"
+            fontFamily="Arial, sans-serif"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#6b7280"
+            style={{ pointerEvents: 'none' }}
+          >
+            Add symbols to start creating
+          </text>
+        )}
+      </svg>
 
-              const buttonSize = 18; // Fixed button size
+      {/* Interactive overlay for edit controls */}
+      {!isPlayMode && (
+        <div
+          ref={activeCanvasRef}
+          className="absolute inset-0 pointer-events-none"
+          onMouseMove={onMouseMove}
+          onMouseUp={onMouseUp}
+          onMouseLeave={onMouseUp}
+          onTouchMove={onMouseMove ? (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            if (!touch) return;
+            const mouseEvent = new MouseEvent('mousemove', {
+              clientX: touch.clientX,
+              clientY: touch.clientY,
+              bubbles: true
+            });
+            onMouseMove(mouseEvent as any);
+          } : undefined}
+          onTouchEnd={onMouseUp}
+          style={{
+            width: '300px',
+            height: '240px',
+            touchAction: 'none',
+          }}
+        >
+          {shapes.map((shape, index) => {
+            const shapeWithId = shape as Shape;
+            const hasId = 'id' in shape;
+            if (!hasId) return null;
 
-              return (
-                <>
-                  {onMouseDown && (
-                    <>
-                      {/* Resize Button - Bottom Right */}
-                      <div
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          onMouseDown(e, shapeWithId.id, 'resize');
-                        }}
-                        onTouchStart={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          const touch = e.touches[0];
-                          if (!touch) return;
-                          const mouseEvent = new MouseEvent('mousedown', {
-                            clientX: touch.clientX,
-                            clientY: touch.clientY,
-                            bubbles: true
-                          });
-                          onMouseDown(mouseEvent as any, shapeWithId.id, 'resize');
-                        }}
-                        className="absolute bg-gray-800 border-2 border-white rounded-full cursor-nwse-resize opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center text-white font-bold shadow-lg hover:bg-gray-700 hover:scale-110 touch-manipulation"
-                        style={{
-                          bottom: `-${buttonDistance}px`,
-                          right: `-${buttonDistance}px`,
-                          width: `${buttonSize}px`,
-                          height: `${buttonSize}px`,
-                          fontSize: '10px',
-                          zIndex: 1001
-                        }}
-                        title="Drag down/up to resize"
-                      >
-                        ⇕
-                      </div>
+            // Calculate button positioning
+            const baseSize = 240;
+            const symbolPixelSize = (shape.sizePercent / 100) * baseSize;
+            const symbolRadius = symbolPixelSize / 2;
 
-                      {/* Rotate Button - Top Right */}
-                      <div
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          onMouseDown(e, shapeWithId.id, 'rotate');
-                        }}
-                        onTouchStart={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          const touch = e.touches[0];
-                          if (!touch) return;
-                          const mouseEvent = new MouseEvent('mousedown', {
-                            clientX: touch.clientX,
-                            clientY: touch.clientY,
-                            bubbles: true
-                          });
-                          onMouseDown(mouseEvent as any, shapeWithId.id, 'rotate');
-                        }}
-                        className="absolute bg-gray-800 border-2 border-white rounded-full cursor-grab opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center text-white font-bold shadow-lg hover:bg-gray-700 hover:scale-110 touch-manipulation"
-                        style={{
-                          top: `-${buttonDistance}px`,
-                          right: `-${buttonDistance}px`,
-                          width: `${buttonSize}px`,
-                          height: `${buttonSize}px`,
-                          fontSize: '10px',
-                          zIndex: 1001
-                        }}
-                        title="Drag to rotate"
-                      >
-                        ↻
-                      </div>
-                    </>
-                  )}
+            // Smart button distance - minimum 25px, or symbol edge + 8px buffer
+            const minDistance = 25;
+            const edgeBuffer = 8;
+            const buttonDistance = Math.max(minDistance, symbolRadius + edgeBuffer);
+            const buttonSize = 18;
 
-                  {/* Remove Button - Top Left */}
-                  {onShapeDelete && (
+            return (
+              <div
+                key={shapeWithId.id}
+                className="absolute group pointer-events-auto"
+                style={{
+                  left: `${shape.xPercent}%`,
+                  top: `${shape.yPercent}%`,
+                  transform: 'translate(-50%, -50%)',
+                  width: `${Math.max(40, symbolPixelSize + 20)}px`,
+                  height: `${Math.max(40, symbolPixelSize + 20)}px`,
+                  zIndex:
+                    dragging === shapeWithId.id ||
+                      resizing === shapeWithId.id ||
+                      rotating === shapeWithId.id
+                      ? 1000
+                      : 1,
+                }}
+                onMouseDown={(e) => {
+                  if (onMouseDown && !e.defaultPrevented) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onMouseDown(e, shapeWithId.id, 'move');
+                  }
+                }}
+                title="Click to select, Shift+Click to delete"
+              >
+                {onMouseDown && (
+                  <>
+                    {/* Resize Button - Bottom Right */}
                     <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onShapeDelete(shapeWithId.id);
-                      }}
-                      onTouchEnd={(e) => {
+                      onMouseDown={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        onShapeDelete(shapeWithId.id);
+                        onMouseDown(e, shapeWithId.id, 'resize');
                       }}
-                      className="absolute bg-red-600 border-2 border-white rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center text-white font-bold shadow-lg hover:bg-red-700 hover:scale-110 touch-manipulation"
+                      onTouchStart={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const touch = e.touches[0];
+                        if (!touch) return;
+                        const mouseEvent = new MouseEvent('mousedown', {
+                          clientX: touch.clientX,
+                          clientY: touch.clientY,
+                          bubbles: true
+                        });
+                        onMouseDown(mouseEvent as any, shapeWithId.id, 'resize');
+                      }}
+                      className="absolute bg-gray-800 border-2 border-white rounded-full cursor-nwse-resize opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center text-white font-bold shadow-lg hover:bg-gray-700 hover:scale-110 touch-manipulation"
                       style={{
-                        top: `-${buttonDistance}px`,
-                        left: `-${buttonDistance}px`,
+                        bottom: `-${buttonDistance}px`,
+                        right: `-${buttonDistance}px`,
                         width: `${buttonSize}px`,
                         height: `${buttonSize}px`,
                         fontSize: '10px',
                         zIndex: 1001
                       }}
-                      title="Remove shape"
+                      title="Drag down/up to resize"
                     >
-                      ✕
+                      ⇕
                     </div>
-                  )}
-                </>
-              );
-            })()}
-          </div>
-        );
-      })}
-      {shapes.length === 0 && !isPlayMode && (
-        <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-base pointer-events-none bg-gray-100/80 rounded-lg">
-          <div className="text-center">
-            <p className="font-medium">Add symbols to start creating</p>
-          </div>
+
+                    {/* Rotate Button - Top Right */}
+                    <div
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onMouseDown(e, shapeWithId.id, 'rotate');
+                      }}
+                      onTouchStart={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const touch = e.touches[0];
+                        if (!touch) return;
+                        const mouseEvent = new MouseEvent('mousedown', {
+                          clientX: touch.clientX,
+                          clientY: touch.clientY,
+                          bubbles: true
+                        });
+                        onMouseDown(mouseEvent as any, shapeWithId.id, 'rotate');
+                      }}
+                      className="absolute bg-gray-800 border-2 border-white rounded-full cursor-grab opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center text-white font-bold shadow-lg hover:bg-gray-700 hover:scale-110 touch-manipulation"
+                      style={{
+                        top: `-${buttonDistance}px`,
+                        right: `-${buttonDistance}px`,
+                        width: `${buttonSize}px`,
+                        height: `${buttonSize}px`,
+                        fontSize: '10px',
+                        zIndex: 1001
+                      }}
+                      title="Drag to rotate"
+                    >
+                      ↻
+                    </div>
+                  </>
+                )}
+
+                {/* Remove Button - Top Left */}
+                {onShapeDelete && (
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onShapeDelete(shapeWithId.id);
+                    }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onShapeDelete(shapeWithId.id);
+                    }}
+                    className="absolute bg-red-600 border-2 border-white rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center text-white font-bold shadow-lg hover:bg-red-700 hover:scale-110 touch-manipulation"
+                    style={{
+                      top: `-${buttonDistance}px`,
+                      left: `-${buttonDistance}px`,
+                      width: `${buttonSize}px`,
+                      height: `${buttonSize}px`,
+                      fontSize: '10px',
+                      zIndex: 1001
+                    }}
+                    title="Remove shape"
+                  >
+                    ✕
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

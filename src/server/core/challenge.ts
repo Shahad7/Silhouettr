@@ -13,21 +13,15 @@ const getScreenshotKey = (postId: string): string => {
 
 const storeScreenshot = async (postId: string, screenshotDataUrl: string): Promise<string> => {
   try {
-    // Extract base64 data from data URL
-    const base64Data = screenshotDataUrl.split(',')[1];
-    if (!base64Data) {
-      throw new Error('Invalid screenshot data URL format');
-    }
-
-    // Store the base64 image data in Redis
+    // Store the complete data URL (supports both PNG and SVG)
     const screenshotKey = getScreenshotKey(postId);
-    await redis.set(screenshotKey, base64Data);
+    await redis.set(screenshotKey, screenshotDataUrl);
 
     // Set expiration (optional - 30 days)
     await redis.expire(screenshotKey, 30 * 24 * 60 * 60); // 30 days in seconds
 
-    // Return the data URL directly instead of serving via endpoint
-    return `data:image/png;base64,${base64Data}`;
+    // Return the data URL directly
+    return screenshotDataUrl;
   } catch (error) {
     console.error('Failed to store screenshot in Redis:', error);
     throw new Error('Failed to store screenshot');

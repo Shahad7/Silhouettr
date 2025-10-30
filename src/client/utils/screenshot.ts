@@ -8,17 +8,15 @@ export function renderShapesToCanvas(shapes: Omit<Shape, 'id'>[]): string {
   try {
     console.log('Screenshot: Looking for canvas element...');
 
-    // Try to find the actual canvas element first
-    const canvasElement = document.querySelector('canvas') as HTMLCanvasElement;
+    // Try to find the SVG element first for pixel-perfect capture
+    const svgElement = document.querySelector('svg') as SVGSVGElement;
 
-    if (canvasElement) {
-      console.log('Screenshot: Found canvas element, getting data URL...');
-      const dataUrl = canvasElement.toDataURL('image/png', 0.9);
-      console.log('Screenshot: Generated data URL from canvas, length:', dataUrl.length);
-      return dataUrl;
+    if (svgElement) {
+      console.log('Screenshot: Found SVG element, converting to canvas...');
+      return convertSVGToCanvas(svgElement);
     }
 
-    console.log('Screenshot: No canvas found, creating fallback...');
+    console.log('Screenshot: No SVG found, creating fallback canvas...');
 
     // Fallback: Create a canvas element (same as before)
     const canvas = document.createElement('canvas');
@@ -53,29 +51,22 @@ export function renderShapesToCanvas(shapes: Omit<Shape, 'id'>[]): string {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        // Add text shadow for better visibility
-        if (shape.color === 'black') {
-          ctx.shadowColor = 'rgba(255,255,255,0.8)';
-          ctx.shadowBlur = 1;
-        } else {
-          ctx.shadowColor = 'rgba(0,0,0,0.8)';
-          ctx.shadowBlur = 2;
-        }
+        // Add stroke for better visibility (matching SVG stroke)
+        ctx.strokeStyle = shape.color === 'black' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)';
+        ctx.lineWidth = 1;
 
         // Apply rotation if needed
         if (shape.rotation && shape.rotation !== 0) {
           ctx.save();
           ctx.translate(x, y);
           ctx.rotate((shape.rotation * Math.PI) / 180);
+          ctx.strokeText(shape.shape, 0, 0);
           ctx.fillText(shape.shape, 0, 0);
           ctx.restore();
         } else {
+          ctx.strokeText(shape.shape, x, y);
           ctx.fillText(shape.shape, x, y);
         }
-
-        // Reset shadow
-        ctx.shadowColor = 'transparent';
-        ctx.shadowBlur = 0;
       } catch (shapeError) {
         console.error(`Screenshot: Error rendering shape ${index}:`, shapeError);
       }
@@ -87,6 +78,32 @@ export function renderShapesToCanvas(shapes: Omit<Shape, 'id'>[]): string {
   } catch (error) {
     console.error('Screenshot: Fatal error during rendering:', error);
     throw new Error(`Screenshot generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * Convert SVG element to data URL
+ */
+function convertSVGToCanvas(svgElement: SVGSVGElement): string {
+  try {
+    // Clone the SVG to avoid modifying the original
+    const svgClone = svgElement.cloneNode(true) as SVGSVGElement;
+
+    // Ensure SVG has proper dimensions and namespace
+    svgClone.setAttribute('width', '300');
+    svgClone.setAttribute('height', '240');
+    svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+    // Convert SVG to string and create data URL
+    const svgString = new XMLSerializer().serializeToString(svgClone);
+    const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+
+    console.log('Screenshot: SVG converted to data URL, length:', svgDataUrl.length);
+    return svgDataUrl;
+
+  } catch (error) {
+    console.error('SVG conversion error:', error);
+    throw error;
   }
 }
 
