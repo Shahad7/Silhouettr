@@ -22,8 +22,8 @@ export const CompactLeaderboard: React.FC<CompactLeaderboardProps> = ({
     useEffect(() => {
         const loadLeaderboard = async () => {
             try {
-                const data = await challengeApi.getLeaderboard(postId);
-                setLeaderboard(data.leaderboard.slice(0, maxEntries));
+                const data = await challengeApi.getLeaderboard(postId, 1, maxEntries);
+                setLeaderboard(data.leaderboard);
             } catch (error) {
                 console.error('Failed to load compact leaderboard:', error);
             } finally {

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const SHAPE_PALETTE: string[] = ['●', '▮', '▲', '★', '♦', '▼', '◆', '⬛', '⬤', '▪'];
+const SHAPE_PALETTE: string[] = ['●', '▲', '★', '♦', '▼', '◆', '▪'];
 
 interface ShapeToolbarProps {
   selectedShape: string;
@@ -36,11 +36,12 @@ export const ShapeToolbar: React.FC<ShapeToolbarProps> = ({
       <button
         onClick={onAddShape}
         disabled={!selectedShape}
-        className={`w-full py-1 rounded text-sm font-medium transition ${!selectedShape
+        className={`w-full py-1 rounded text-sm font-medium transition flex items-center justify-center gap-1 ${!selectedShape
           ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
           : 'bg-white text-black hover:bg-gray-100 active:scale-95'
           }`}
       >
+        <span className="text-xs">+</span>
         Add Symbol
       </button>
     </div>

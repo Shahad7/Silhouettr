@@ -149,8 +149,12 @@ export const challengeApi = {
   },
 
   // Get leaderboard for a challenge
-  async getLeaderboard(postId: string): Promise<LeaderboardResponse> {
-    return apiCall<LeaderboardResponse>(`/leaderboard/${encodeURIComponent(postId)}`);
+  async getLeaderboard(postId: string, page: number = 1, pageSize: number = 10): Promise<LeaderboardResponse> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+    });
+    return apiCall<LeaderboardResponse>(`/leaderboard/${encodeURIComponent(postId)}?${params}`);
   },
 };
 

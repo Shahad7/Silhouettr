@@ -31,7 +31,7 @@ export const MenuView: React.FC<MenuViewProps> = ({
             SILHOUETTR
           </h1>
           <div className="w-16 h-0.5 bg-gradient-to-r from-gray-600 to-gray-400 mx-auto rounded-full"></div>
-          <p className="text-gray-400 text-xs mt-3 font-light tracking-wide">DRAW IN BLACK • GUESS THE SHADOW</p>
+          <p className="text-gray-400 text-xs mt-3 font-light tracking-wide">CREATE SYMBOLS • CHALLENGE MINDS</p>
         </div>
 
         {/* Success Message - Fixed scale */}

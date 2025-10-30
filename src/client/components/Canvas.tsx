@@ -12,6 +12,7 @@ interface CanvasProps {
   onMouseDown?: (e: React.MouseEvent, shapeId: string, handleType?: HandleType) => void;
   onShapeDelete?: (shapeId: string) => void;
   canvasRef?: React.RefObject<HTMLDivElement | null>;
+  screenshotUrl?: string; // For displaying saved screenshot in play mode
 }
 
 export const Canvas: React.FC<CanvasProps> = ({
@@ -25,6 +26,7 @@ export const Canvas: React.FC<CanvasProps> = ({
   onMouseDown,
   onShapeDelete,
   canvasRef,
+  screenshotUrl,
 }) => {
   const localCanvasRef = useRef<HTMLDivElement>(null);
   const activeCanvasRef = canvasRef || localCanvasRef;
@@ -43,6 +45,29 @@ export const Canvas: React.FC<CanvasProps> = ({
     }
   };
 
+  // If in play mode and we have a screenshot, display the image instead of shapes
+  if (isPlayMode && screenshotUrl) {
+    return (
+      <div
+        className="relative bg-gray-900 border-2 border-gray-700 rounded-xl overflow-hidden mx-auto"
+        style={{
+          width: '300px',  // FIXED WIDTH - exactly the same everywhere
+          height: '240px', // FIXED HEIGHT - exactly the same everywhere
+        }}
+      >
+        <img
+          src={screenshotUrl}
+          alt="Challenge shapes"
+          className="w-full h-full object-cover"
+          style={{
+            width: '300px',
+            height: '240px',
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       ref={!isPlayMode ? activeCanvasRef : null}
@@ -52,6 +77,7 @@ export const Canvas: React.FC<CanvasProps> = ({
       onTouchMove={!isPlayMode && onMouseMove ? (e) => {
         e.preventDefault();
         const touch = e.touches[0];
+        if (!touch) return;
         const mouseEvent = new MouseEvent('mousemove', {
           clientX: touch.clientX,
           clientY: touch.clientY,
@@ -62,16 +88,15 @@ export const Canvas: React.FC<CanvasProps> = ({
       onTouchEnd={!isPlayMode ? onMouseUp : undefined}
       className="relative bg-gray-900 border-2 border-gray-700 rounded-xl overflow-visible touch-manipulation mx-auto"
       style={{
-        aspectRatio: '5/4', // Maintains 500:400 ratio (consistent across devices)
-        width: '100%',
-        maxWidth: '500px', // Intrinsic design: fixed maximum width
-        height: 'auto',
+        width: '300px',  // FIXED WIDTH - exactly the same everywhere, fits all mobile devices
+        height: '240px', // FIXED HEIGHT - exactly the same everywhere (300 * 4/5 = 240)
       }}
     >
       {shapes.map((shape, index) => {
-        // Calculate consistent size based on fixed reference (400px base)
-        // This ensures uniform rendering across all devices and contexts
-        const baseSize = 400; // Fixed reference size for consistency
+        // CRITICAL: Fixed baseSize matches the fixed canvas height for perfect consistency
+        // Canvas is ALWAYS 300x240px in both CreateView and ChallengeView
+        // This ensures shapes render at exactly the same size and positions everywhere
+        const baseSize = 240; // Fixed reference size matching canvas height
         const fontSize = `${(shape.sizePercent / 100) * baseSize}px`;
 
         const shapeWithId = shape as Shape;
@@ -105,6 +130,7 @@ export const Canvas: React.FC<CanvasProps> = ({
                   ? (e) => {
                     e.preventDefault();
                     const touch = e.touches[0];
+                    if (!touch) return;
                     const mouseEvent = new MouseEvent('mousedown', {
                       clientX: touch.clientX,
                       clientY: touch.clientY,
@@ -140,10 +166,17 @@ export const Canvas: React.FC<CanvasProps> = ({
               {shape.shape}
             </div>
             {!isPlayMode && hasId && (() => {
-              // Calculate button positioning based on shape size to prevent collision
-              const shapeSize = Math.max(shape.sizePercent, 8); // Minimum 8% for button spacing
-              const buttonOffset = Math.max(shapeSize * 0.6, 12); // Dynamic offset, minimum 12px
-              const buttonSize = Math.min(Math.max(shapeSize * 0.4, 16), 24); // Dynamic size 16-24px
+              // Smart button positioning - close to edges but prevents collision on small symbols
+              const baseSize = 240; // Canvas height reference
+              const actualSymbolSize = (shape.sizePercent / 100) * baseSize; // Real pixel size
+              const symbolRadius = actualSymbolSize / 2; // Half the symbol size
+
+              // For small symbols: ensure minimum distance to prevent button collision
+              // For large symbols: stay close to symbol edge
+              const minOffset = 22; // Minimum distance to prevent button collision
+              const edgeOffset = symbolRadius + 8; // 8px outside symbol edge
+              const buttonOffset = Math.max(minOffset, edgeOffset);
+              const buttonSize = 18; // Fixed button size
 
               return (
                 <>
@@ -160,6 +193,7 @@ export const Canvas: React.FC<CanvasProps> = ({
                           e.preventDefault();
                           e.stopPropagation();
                           const touch = e.touches[0];
+                          if (!touch) return;
                           const mouseEvent = new MouseEvent('mousedown', {
                             clientX: touch.clientX,
                             clientY: touch.clientY,
@@ -173,7 +207,7 @@ export const Canvas: React.FC<CanvasProps> = ({
                           right: `-${buttonOffset}px`,
                           width: `${buttonSize}px`,
                           height: `${buttonSize}px`,
-                          fontSize: `${Math.max(buttonSize * 0.5, 10)}px`,
+                          fontSize: '10px',
                           zIndex: 1001
                         }}
                         title="Drag down/up to resize"
@@ -192,6 +226,7 @@ export const Canvas: React.FC<CanvasProps> = ({
                           e.preventDefault();
                           e.stopPropagation();
                           const touch = e.touches[0];
+                          if (!touch) return;
                           const mouseEvent = new MouseEvent('mousedown', {
                             clientX: touch.clientX,
                             clientY: touch.clientY,
@@ -205,7 +240,7 @@ export const Canvas: React.FC<CanvasProps> = ({
                           right: `-${buttonOffset}px`,
                           width: `${buttonSize}px`,
                           height: `${buttonSize}px`,
-                          fontSize: `${Math.max(buttonSize * 0.5, 10)}px`,
+                          fontSize: '10px',
                           zIndex: 1001
                         }}
                         title="Drag to rotate"
@@ -233,7 +268,7 @@ export const Canvas: React.FC<CanvasProps> = ({
                         left: `-${buttonOffset}px`,
                         width: `${buttonSize}px`,
                         height: `${buttonSize}px`,
-                        fontSize: `${Math.max(buttonSize * 0.5, 10)}px`,
+                        fontSize: '10px',
                         zIndex: 1001
                       }}
                       title="Remove shape"
@@ -250,7 +285,6 @@ export const Canvas: React.FC<CanvasProps> = ({
       {shapes.length === 0 && !isPlayMode && (
         <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-base pointer-events-none bg-gray-900/50 rounded-xl">
           <div className="text-center">
-            <div className="text-2xl mb-2">◼️</div>
             <p className="font-medium">Add symbols to start creating</p>
           </div>
         </div>

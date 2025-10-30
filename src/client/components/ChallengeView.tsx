@@ -23,6 +23,7 @@ interface ChallengeState {
   completed: boolean;
   completionData: GuessSubmissionResponse | null;
   offline: boolean;
+  inlineError: string | null; // For wrong guesses and minor errors
 }
 
 export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) => {
@@ -37,6 +38,7 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
     completed: false,
     completionData: null,
     offline: false, // Start assuming online, detect through API errors
+    inlineError: null,
   });
 
   // Load challenge data on mount
@@ -48,15 +50,22 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
 
   const loadChallenge = async () => {
     try {
-      setState(prev => ({ ...prev, loading: true, error: null, retryable: false, offline: false }));
+      setState(prev => ({ ...prev, loading: true, error: null, retryable: false, offline: false, inlineError: null }));
 
       const data = await challengeApi.getChallenge(postId);
+
+      // Check if user already completed this challenge
+      const alreadyCompleted = data.session?.completed === true;
+
+
+
       setState(prev => ({
         ...prev,
         challenge: data.challenge,
         session: data.session || null,
         loading: false,
         offline: false, // Successfully loaded, we're online
+        inlineError: alreadyCompleted ? 'You already submitted' : null,
       }));
     } catch (error) {
       const { error: errorMessage, retryable } = handleApiError(error);
@@ -82,7 +91,7 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
     if (!state.session || !state.guess.trim() || state.submitting || state.offline) return;
 
     try {
-      setState(prev => ({ ...prev, submitting: true, error: null, retryable: false }));
+      setState(prev => ({ ...prev, submitting: true, inlineError: null, retryable: false }));
 
       const result = await challengeApi.submitGuess({
         postId,
@@ -98,10 +107,12 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
           submitting: false,
         }));
       } else {
+        // Wrong guess - use inline error to stay in challenge view
         setState(prev => ({
           ...prev,
           guess: '',
           submitting: false,
+          inlineError: result.message || 'Incorrect guess. Try again!',
           session: prev.session ? {
             ...prev.session,
             attempts: result.attempts,
@@ -114,28 +125,33 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
       // Detect if this is a network error (likely offline)
       const isNetworkError = error instanceof NetworkError || error instanceof TimeoutError;
 
-      setState(prev => ({
-        ...prev,
-        submitting: false,
-        error: errorMessage,
-        retryable,
-        offline: isNetworkError,
-      }));
+      // Check if error indicates already completed challenge
+      const isAlreadyCompleted = errorMessage.toLowerCase().includes('already') ||
+        errorMessage.toLowerCase().includes('completed') ||
+        errorMessage.toLowerCase().includes('submitted');
+
+      if (isAlreadyCompleted) {
+        // Already completed - show as inline error to stay in challenge view
+        setState(prev => ({
+          ...prev,
+          submitting: false,
+          inlineError: 'You already submitted',
+          offline: isNetworkError,
+        }));
+      } else {
+        // Serious error - show full screen error
+        setState(prev => ({
+          ...prev,
+          submitting: false,
+          error: errorMessage,
+          retryable,
+          offline: isNetworkError,
+        }));
+      }
     }
   };
 
-  const handleRetry = () => {
-    setState(prev => ({
-      ...prev,
-      completed: false,
-      completionData: null,
-      guess: '',
-      error: null,
-      retryable: false,
-      offline: false, // Clear offline state when retrying
-    }));
-    loadChallenge();
-  };
+
 
   return (
     <>
@@ -193,7 +209,7 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
         <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black p-4 flex items-center justify-center">
           <div className="bg-gray-800/80 backdrop-blur-lg rounded-2xl border border-gray-700/50 p-3 w-full max-w-[360px] shadow-2xl mx-auto text-center">
             <h2 className="text-base font-black text-white mb-2">SOLVED!</h2>
-            
+
             <div className="mb-3">
               <PerformanceMetrics
                 attempts={state.completionData.attempts}
@@ -204,17 +220,11 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
                 })}
               />
             </div>
-            
-            <div className="flex gap-2">
-              <button
-                onClick={handleRetry}
-                className="flex-1 py-2 bg-gray-700 text-white rounded text-xs border border-gray-600"
-              >
-                Play Again
-              </button>
+
+            <div className="flex justify-center">
               <button
                 onClick={onBack}
-                className="flex-1 py-2 bg-white text-black rounded text-xs font-bold"
+                className="px-6 py-2 bg-white text-black rounded text-xs font-bold"
               >
                 ← Menu
               </button>
@@ -236,12 +246,12 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
               >
                 ← Menu
               </button>
-              
+
               {/* Timer & Attempts - CENTER STAGE */}
               <div className="flex items-center gap-3 bg-gray-700 px-3 py-1 rounded border border-gray-600">
                 <Timer
                   {...(state.session?.startTime && { startTime: state.session.startTime })}
-                  isRunning={!state.completed && !!state.session && !state.offline}
+                  isRunning={!state.completed && !!state.session && !state.offline && !state.session?.completed}
                 />
                 <div className="w-px h-4 bg-gray-600"></div>
                 <AttemptCounter attempts={state.session?.attempts || 0} />
@@ -258,21 +268,28 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
 
           {/* Canvas - MAXIMUM SPACE */}
           <div className="flex-1 flex items-center justify-center p-3 bg-gray-900 min-h-0">
-            <div className="w-full max-w-[360px] mx-auto">
-              <Canvas
-                shapes={state.challenge.shapes}
-                isPlayMode={true}
-              />
-            </div>
+            <Canvas
+              shapes={state.challenge.shapes}
+              isPlayMode={true}
+              {...(state.challenge.screenshotUrl && { screenshotUrl: state.challenge.screenshotUrl })}
+            />
           </div>
 
           {/* Input - PERFECT POSITION */}
           <div className="bg-gray-800 border-t border-gray-700 p-3">
             <div className="max-w-[360px] mx-auto w-full">
               <form onSubmit={handleGuessSubmit}>
-                {state.error && !state.loading && (
+                {state.inlineError && !state.loading && (
                   <div className="p-2 bg-red-500/10 border border-red-500/30 rounded text-center mb-2">
-                    <p className="text-xs text-red-400">{state.error}</p>
+                    <p className="text-xs text-red-400 mb-2">{state.inlineError}</p>
+                    {!state.offline && !state.inlineError.toLowerCase().includes('you already submitted') && (
+                      <button
+                        onClick={() => setState(prev => ({ ...prev, inlineError: null }))}
+                        className="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition-colors"
+                      >
+                        Try Again
+                      </button>
+                    )}
                   </div>
                 )}
                 <div className="flex gap-2">
@@ -280,13 +297,14 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
                     type="text"
                     value={state.guess}
                     onChange={(e) => setState(prev => ({ ...prev, guess: e.target.value }))}
-                    placeholder="What's in the silhouette?"
+                    placeholder={state.session?.completed ? "Already completed" : "What's in the silhouette?"}
+                    maxLength={50}
                     className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm focus:outline-none focus:border-white disabled:bg-gray-600 placeholder-gray-400"
-                    disabled={state.submitting || state.offline}
+                    disabled={state.submitting || state.offline || state.session?.completed}
                   />
                   <button
                     type="submit"
-                    disabled={!state.guess.trim() || state.submitting || state.offline}
+                    disabled={!state.guess.trim() || state.submitting || state.offline || state.session?.completed}
                     className="px-4 py-2 bg-white text-black rounded text-sm font-bold disabled:bg-gray-600 disabled:text-gray-400 hover:bg-gray-100 transition-colors"
                   >
                     Guess

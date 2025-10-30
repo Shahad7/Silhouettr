@@ -80,27 +80,45 @@ export const CreateView: React.FC<CreateViewProps> = ({
 
         {/* Input Section - Ultra Compact */}
         <div className="flex-shrink-0 space-y-2">
-          <input
-            type="text"
-            value={postTitle}
-            onChange={(e) => onPostTitleChange(e.target.value)}
-            placeholder="Title"
-            className={`w-full px-2 py-1 rounded border text-sm ${errors?.postTitle
-              ? 'border-red-500 bg-red-500/10 text-red-300'
-              : 'border-gray-600 bg-gray-700/50 text-white'
-              }`}
-          />
+          <div>
+            <input
+              type="text"
+              value={postTitle}
+              onChange={(e) => onPostTitleChange(e.target.value)}
+              placeholder="Title"
+              maxLength={100}
+              className={`w-full px-2 py-1 rounded border text-sm ${errors?.postTitle
+                ? 'border-red-500 bg-red-500/10 text-red-300'
+                : 'border-gray-600 bg-gray-700/50 text-white'
+                }`}
+            />
+            {errors?.postTitle && (
+              <p className="text-red-400 text-xs mt-1">{errors.postTitle}</p>
+            )}
+          </div>
 
-          <input
-            type="text"
-            value={answer}
-            onChange={(e) => onAnswerChange(e.target.value)}
-            placeholder="Answer"
-            className={`w-full px-2 py-1 rounded border text-sm ${errors?.answer
-              ? 'border-red-500 bg-red-500/10 text-red-300'
-              : 'border-gray-600 bg-gray-700/50 text-white'
-              }`}
-          />
+          <div>
+            <input
+              type="text"
+              value={answer}
+              onChange={(e) => onAnswerChange(e.target.value)}
+              placeholder="Answer"
+              maxLength={50}
+              className={`w-full px-2 py-1 rounded border text-sm ${errors?.answer
+                ? 'border-red-500 bg-red-500/10 text-red-300'
+                : 'border-gray-600 bg-gray-700/50 text-white'
+                }`}
+            />
+            {errors?.answer && (
+              <p className="text-red-400 text-xs mt-1">{errors.answer}</p>
+            )}
+          </div>
+
+          {errors?.shapes && (
+            <div className="p-2 bg-red-500/10 border border-red-500/30 rounded text-center">
+              <p className="text-red-400 text-xs">{errors.shapes}</p>
+            </div>
+          )}
 
           <div className="flex gap-1">
             <button

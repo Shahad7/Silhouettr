@@ -42,7 +42,7 @@ Built as a React TypeScript application for Reddit's Devvit platform, the game i
 ### 🎨 **Interactive Shape Creation System**
 Unlike static puzzle games, Shape Guess Challenge features a sophisticated drag-and-drop editor where players can:
 - **Position shapes with pixel precision** using percentage-based coordinates that work across all devices
-- **Resize shapes dynamically** from 2% to 30% of canvas size with real-time visual feedback
+- **Resize shapes dynamically** from 2% with no maximum limit, allowing unlimited creative freedom
 - **Rotate shapes 360 degrees** with intuitive circular drag controls for perfect orientation
 - **Layer and overlap shapes** to create complex visual narratives and depth
 
@@ -73,7 +73,7 @@ Specifically designed for Reddit's mobile-heavy user base:
 - **10 Unique Unicode Shapes**: Carefully selected black geometric symbols (●, ▮, ▲, ★, ♦, ▼, ◆, ⬛, ⬤, ▪) optimized for visual storytelling
 - **Real-Time Canvas Editor**: Drag-and-drop positioning with percentage-based coordinates for cross-device consistency
 - **Interactive Control Handles**: 
-  - Blue resize handles (⇕) for scaling shapes from 2-30% of canvas size
+  - Blue resize handles (⇕) for scaling shapes from 2% with no upper limit
   - Green rotation handles (↻) for 360-degree rotation control
   - Hover-activated controls that appear only when needed
 - **Smart Shape Management**: Shift+Click deletion, z-index management during manipulation, and visual feedback systems
@@ -120,7 +120,7 @@ Shape Guess Challenge is a creative puzzle game where players use Unicode shapes
 2. **Choose Your Shapes**
    - Select from 10 different Unicode shapes: ●, ▮, ▲, ★, ♦, ▼, ◆, ⬛, ⬤, ▪
    - Active shapes display with blue background highlighting
-   - Adjust the size (2-30% of canvas) using the responsive size slider
+   - Adjust the size (2% minimum, no maximum) for unlimited creative possibilities
    - Set rotation (0-359°) using the precision rotation control
    - Click "Add Shape" to place it on the canvas at a randomized starting position
 
@@ -237,7 +237,7 @@ The game features a sophisticated shape manipulation system that rivals professi
 **Advanced Interaction System:**
 - **Precision Positioning**: Percentage-based coordinate system ensures pixel-perfect placement across all screen sizes
 - **Multi-Handle Controls**: Hover-activated blue resize handles (⇕) and green rotation handles (↻) provide intuitive editing
-- **Real-Time Feedback**: Live size percentages (2-30%) and rotation degrees (0-359°) with smooth visual transitions
+- **Real-Time Feedback**: Live size percentages (2%+) and rotation degrees (0-359°) with smooth visual transitions
 - **Smart State Management**: Seamless switching between drag, resize, and rotate modes with visual indicators
 - **Responsive Canvas**: Maintains perfect 5:4 aspect ratio while adapting to any screen size from mobile to desktop
 
@@ -324,7 +324,7 @@ Unlike traditional puzzle games with fixed content, Shape Guess Challenge create
 
 #### **Pre-Placement Configuration**
 3. **Master the Control Panel**
-   - **Size Slider**: Drag to set shape scale (2-30% of canvas width)
+   - **Size Control**: Drag to set shape scale (2% minimum, unlimited maximum)
      - Live percentage display shows exact current value
      - Smaller percentages for detail work, larger for main elements
    - **Rotation Dial**: Drag to set initial angle (0-359 degrees)
@@ -341,7 +341,7 @@ Unlike traditional puzzle games with fixed content, Shape Guess Challenge create
    
    - **Precision Resizing System**:
      - Hover over any shape to reveal the blue resize handle (⇕) in the bottom-right corner
-     - Drag handle downward to enlarge (up to 30% maximum)
+     - Drag handle downward to enlarge (no maximum limit)
      - Drag handle upward to shrink (down to 2% minimum)
      - 0.1 sensitivity scaling for precise size control
      - Live size feedback with smooth transitions

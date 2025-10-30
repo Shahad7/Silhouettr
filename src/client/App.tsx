@@ -131,6 +131,11 @@ function App() {
     }
 
     try {
+      // Generate screenshot of the canvas
+      const { renderShapesToCanvas } = await import('./utils/screenshot');
+      const screenshotDataUrl = renderShapesToCanvas(shapes.map(({ id, ...rest }) => rest));
+
+
       // Create challenge via server API
       const response = await fetch('/api/create-challenge', {
         method: 'POST',
@@ -139,6 +144,7 @@ function App() {
           shapes: shapes.map(({ id, ...rest }) => rest), // Remove internal IDs
           answer: answer.toLowerCase().trim(),
           postTitle: postTitle.trim(),
+          screenshotDataUrl: screenshotDataUrl,
         }),
       });
 
@@ -253,7 +259,6 @@ function App() {
         <Leaderboard
           postId={currentPostId}
           onBack={handleChallengeBack}
-          onPlayChallenge={() => setView('challenge')}
         />
       )}
     </div>

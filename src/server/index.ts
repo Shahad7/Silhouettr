@@ -113,7 +113,7 @@ router.get('/api/health', async (_req, res): Promise<void> => {
 router.post<{}, CreateChallengeResponse | ErrorResponse, CreateChallengeRequest>(
   '/api/create-challenge',
   async (req, res): Promise<void> => {
-    const { shapes, answer, postTitle } = req.body;
+    const { shapes, answer, postTitle, screenshotDataUrl } = req.body;
 
     // Validate request data
     if (!shapes || !Array.isArray(shapes) || shapes.length === 0) {
@@ -224,7 +224,7 @@ router.post<{}, CreateChallengeResponse | ErrorResponse, CreateChallengeRequest>
       }
 
       // Create the challenge
-      const { challenge, postUrl } = await createChallenge(shapes, answer, postTitle);
+      const { challenge, postUrl } = await createChallenge(shapes, answer, postTitle, screenshotDataUrl);
 
       res.status(201).json({
         type: 'create-challenge',
@@ -496,7 +496,7 @@ router.get<{ postId: string }, LeaderboardResponse | ErrorResponse>(
   '/api/leaderboard/:postId',
   async (req, res): Promise<void> => {
     const { postId } = req.params;
-    const { limit = '10', offset = '0' } = req.query;
+    const { page = '1', pageSize = '10' } = req.query;
 
     if (!postId) {
       res.status(400).json({
@@ -510,8 +510,9 @@ router.get<{ postId: string }, LeaderboardResponse | ErrorResponse>(
 
     try {
       // Parse query parameters
-      const limitNum = Math.min(Math.max(parseInt(limit as string) || 10, 1), 100); // Max 100 entries
-      const offsetNum = Math.max(parseInt(offset as string) || 0, 0);
+      const pageNum = Math.max(parseInt(page as string) || 1, 1);
+      const pageSizeNum = Math.min(Math.max(parseInt(pageSize as string) || 10, 1), 100); // Max 100 entries
+      const offsetNum = (pageNum - 1) * pageSizeNum;
 
       // Get current user (optional for leaderboard viewing)
       const username = await reddit.getCurrentUsername();
@@ -536,14 +537,16 @@ router.get<{ postId: string }, LeaderboardResponse | ErrorResponse>(
         leaderboardResponse = await leaderboardService.getLeaderboardWithUserPosition(
           postId,
           username,
-          limitNum
+          pageSizeNum
         );
       } else {
         // Get standard leaderboard
         leaderboardResponse = await leaderboardService.getLeaderboard(
           postId,
-          limitNum,
-          offsetNum
+          pageSizeNum,
+          offsetNum,
+          pageNum,
+          pageSizeNum
         );
       }
 
@@ -568,6 +571,82 @@ router.get<{ postId: string }, LeaderboardResponse | ErrorResponse>(
         message: errorMessage,
         code: errorCode,
         retryable,
+      });
+    }
+  }
+);
+
+// Screenshot serving endpoint
+router.get<{ postId: string }>(
+  '/api/screenshot/:postId',
+  async (req, res): Promise<void> => {
+    const { postId } = req.params;
+
+    if (!postId) {
+      res.status(400).json({
+        status: 'error',
+        message: 'postId is required',
+        code: 'MISSING_POST_ID',
+        retryable: false,
+      });
+      return;
+    }
+
+    try {
+      console.log('Server: Serving screenshot for postId:', postId);
+      // Get screenshot from Redis
+      const screenshotDataUrl = await getScreenshot(postId);
+
+      if (!screenshotDataUrl) {
+        console.log('Server: Screenshot not found for postId:', postId);
+        res.status(404).json({
+          status: 'error',
+          message: 'Screenshot not found',
+          code: 'SCREENSHOT_NOT_FOUND',
+          retryable: false,
+        });
+        return;
+      }
+
+      console.log('Server: Found screenshot data URL length:', screenshotDataUrl.length);
+
+      // Extract base64 data and convert to buffer
+      const base64Data = screenshotDataUrl.split(',')[1];
+      if (!base64Data) {
+        res.status(500).json({
+          status: 'error',
+          message: 'Invalid screenshot data format',
+          code: 'INVALID_SCREENSHOT_DATA',
+          retryable: false,
+        });
+        return;
+      }
+
+      const imageBuffer = Buffer.from(base64Data, 'base64');
+
+      // Set appropriate headers for PNG image
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Content-Length', imageBuffer.length);
+      res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+      res.setHeader('ETag', `"${postId}"`);
+
+      // Send the image
+      res.send(imageBuffer);
+    } catch (error) {
+      console.error(`Error serving screenshot for post ${postId}:`, error);
+
+      let errorMessage = 'Failed to serve screenshot';
+      const errorCode = 'SCREENSHOT_SERVING_ERROR';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      res.status(500).json({
+        status: 'error',
+        message: errorMessage,
+        code: errorCode,
+        retryable: true,
       });
     }
   }

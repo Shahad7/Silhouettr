@@ -7,7 +7,7 @@ interface LeaderboardProps {
   postId: string;
   currentUsername?: string;
   onBack: () => void;
-  onPlayChallenge?: () => void;
+
 }
 
 interface LeaderboardState {
@@ -19,13 +19,15 @@ interface LeaderboardState {
   retryable: boolean;
   offline: boolean;
   lastUpdated: number;
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
 }
 
 export const Leaderboard: React.FC<LeaderboardProps> = ({
   postId,
   currentUsername,
-  onBack,
-  onPlayChallenge
+  onBack
 }) => {
   const [state, setState] = useState<LeaderboardState>({
     leaderboard: [],
@@ -35,22 +37,30 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
     retryable: false,
     offline: false,
     lastUpdated: 0,
+    currentPage: 1,
+    totalPages: 1,
+    pageSize: 10,
   });
 
   useEffect(() => {
-    loadLeaderboard();
+    loadLeaderboard(1);
   }, [postId]);
 
-  const loadLeaderboard = async () => {
+  const loadLeaderboard = async (page: number = 1) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null, retryable: false, offline: false }));
 
-      const data = await challengeApi.getLeaderboard(postId);
+      // Server-side pagination
+      const data = await challengeApi.getLeaderboard(postId, page, state.pageSize);
+
       setState(prev => ({
         ...prev,
         leaderboard: data.leaderboard,
         ...(data.userRank !== undefined && { userRank: data.userRank }),
         totalPlayers: data.totalPlayers,
+        currentPage: data.currentPage,
+        totalPages: data.totalPages,
+        pageSize: data.pageSize,
         loading: false,
         lastUpdated: Date.now(),
         offline: false,
@@ -67,6 +77,18 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
         retryable,
         offline: isNetworkError,
       }));
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (state.currentPage > 1) {
+      loadLeaderboard(state.currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (state.currentPage < state.totalPages) {
+      loadLeaderboard(state.currentPage + 1);
     }
   };
 
@@ -88,23 +110,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
     return `${Math.floor(diffMinutes / 1440)}d ago`;
   };
 
-  const getRankEmoji = (rank: number): string => {
-    switch (rank) {
-      case 1: return '🥇';
-      case 2: return '🥈';
-      case 3: return '🥉';
-      default: return '🏅';
-    }
-  };
 
-  const getRankColor = (rank: number): string => {
-    switch (rank) {
-      case 1: return 'text-yellow-600 bg-yellow-50';
-      case 2: return 'text-gray-600 bg-gray-50';
-      case 3: return 'text-orange-600 bg-orange-50';
-      default: return 'text-blue-600 bg-blue-50';
-    }
-  };
 
   const isCurrentUser = (username: string): boolean => {
     return currentUsername === username;
@@ -134,7 +140,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             <div className="flex gap-3 justify-center">
               {(state.retryable || state.offline) && (
                 <button
-                  onClick={loadLeaderboard}
+                  onClick={() => loadLeaderboard(1)}
                   disabled={state.offline}
                   className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium"
                 >
@@ -178,7 +184,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={loadLeaderboard}
+                  onClick={() => loadLeaderboard(state.currentPage)}
                   disabled={state.offline}
                   className="text-gray-400 hover:text-white text-sm disabled:text-gray-600 transition-colors p-2 hover:bg-gray-700 rounded-lg"
                   title="Refresh leaderboard"
@@ -270,35 +276,37 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             </div>
           </div>
 
-          {/* PAGINATION BUTTONS - ADDED */}
-          <div className="bg-gray-800 border-t border-gray-700 p-3">
-            <div className="max-w-[360px] mx-auto w-full">
-              <div className="flex justify-between items-center gap-2">
-                {/* Previous Button */}
-                <button
-                  onClick={() => {/* You'll handle this */ }}
-                  disabled={/* You'll handle disabled state */}
-                  className="px-4 py-2 bg-gray-700 text-white rounded text-sm font-medium border border-gray-600 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
-                >
-                  ← Previous
-                </button>
+          {/* PAGINATION BUTTONS */}
+          {state.totalPages > 1 && (
+            <div className="bg-gray-800 border-t border-gray-700 p-3">
+              <div className="max-w-[360px] mx-auto w-full">
+                <div className="flex justify-between items-center gap-2">
+                  {/* Previous Button */}
+                  <button
+                    onClick={handlePreviousPage}
+                    disabled={state.currentPage <= 1}
+                    className="px-4 py-2 bg-gray-700 text-white rounded text-sm font-medium border border-gray-600 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
+                  >
+                    ← Previous
+                  </button>
 
-                {/* Page Info */}
-                <div className="text-xs text-gray-400 text-center">
-                  Page {/* You'll add current page */} of {/* You'll add total pages */}
+                  {/* Page Info */}
+                  <div className="text-xs text-gray-400 text-center">
+                    Page {state.currentPage} of {state.totalPages}
+                  </div>
+
+                  {/* Next Button */}
+                  <button
+                    onClick={handleNextPage}
+                    disabled={state.currentPage >= state.totalPages}
+                    className="px-4 py-2 bg-gray-700 text-white rounded text-sm font-medium border border-gray-600 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
+                  >
+                    Next →
+                  </button>
                 </div>
-
-                {/* Next Button */}
-                <button
-                  onClick={() => {/* You'll handle this */ }}
-                  disabled={/* You'll handle disabled state */}
-                  className="px-4 py-2 bg-gray-700 text-white rounded text-sm font-medium border border-gray-600 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
-                >
-                  Next →
-                </button>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Footer */}
           <div className="bg-gray-800 border-t border-gray-700 p-3">

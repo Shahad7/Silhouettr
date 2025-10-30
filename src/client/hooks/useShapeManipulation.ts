@@ -24,11 +24,14 @@ export const useShapeManipulation = () => {
     const canvasHeight = rect.height;
 
     if (handleType === 'resize') {
+      console.log('Starting resize for shape:', shapeId, 'initial size:', shape.sizePercent);
       setResizing(shapeId);
       setOffset({
         x: e.clientX,
         y: e.clientY,
-        initialSize: shape.sizePercent,
+
+        // ✅ Ensure starting size is stored so resize is relative
+        initialSize: shape.sizePercent
       });
     } else if (handleType === 'rotate') {
       setRotating(shapeId);
@@ -46,7 +49,6 @@ export const useShapeManipulation = () => {
         startAngle: angle,
       });
     } else {
-      // Calculate pixel position from percentage
       const shapeX = (shape.xPercent / 100) * canvasWidth;
       const shapeY = (shape.yPercent / 100) * canvasHeight;
 
@@ -62,15 +64,27 @@ export const useShapeManipulation = () => {
     e: React.MouseEvent,
     setShapes: React.Dispatch<React.SetStateAction<Shape[]>>
   ): void => {
+
+    // ✅ FIXED RESIZE LOGIC — minimal change
     if (resizing) {
-      const deltaY = e.clientY - offset.y; // Positive delta = bigger (pull down)
-      const sizeDelta = deltaY * 0.1; // Sensitivity
-      const newSize = Math.max(2, Math.min(30, (offset.initialSize || 10) + sizeDelta));
+      const deltaX = e.clientX - offset.x;
+      const deltaY = e.clientY - offset.y;
+
+      // ✅ Natural corner scaling: pick dominant axis
+      const delta = Math.max(deltaX, deltaY);
+
+      // ✅ Same sensitivity as before but now consistent & proportional
+      const newSize = Math.max(2, (offset.initialSize || 10) + delta * 0.1);
 
       setShapes((prevShapes) =>
         prevShapes.map((s) => (s.id === resizing ? { ...s, sizePercent: newSize } : s))
       );
-    } else if (rotating && offset.centerX !== undefined && offset.centerY !== undefined) {
+
+      return;
+    }
+
+    // (unchanged rotate logic)
+    if (rotating && offset.centerX !== undefined && offset.centerY !== undefined) {
       const angle =
         Math.atan2(e.clientY - offset.centerY, e.clientX - offset.centerX) * (180 / Math.PI);
       const deltaAngle = angle - (offset.startAngle || 0);
@@ -79,16 +93,18 @@ export const useShapeManipulation = () => {
       setShapes((prevShapes) =>
         prevShapes.map((s) => (s.id === rotating ? { ...s, rotation: newRotation } : s))
       );
-    } else if (dragging && canvasRef.current) {
+      return;
+    }
+
+    // (unchanged drag logic)
+    if (dragging && canvasRef.current) {
       const rect = canvasRef.current.getBoundingClientRect();
       const canvasWidth = rect.width;
       const canvasHeight = rect.height;
 
-      // Calculate pixel position
       const newX = e.clientX - rect.left - offset.x;
       const newY = e.clientY - rect.top - offset.y;
 
-      // Convert to percentage
       const newXPercent = Math.max(0, Math.min(100, (newX / canvasWidth) * 100));
       const newYPercent = Math.max(0, Math.min(100, (newY / canvasHeight) * 100));
 
@@ -106,6 +122,12 @@ export const useShapeManipulation = () => {
     setRotating(null);
   };
 
+  // ✅ Helper to get handle offset based on current shape size
+  const getHandleOffset = (sizePercent: number): number => {
+    // Scale handle distance with shape size (adjust multiplier as needed)
+    return sizePercent * 0.5;
+  };
+
   return {
     dragging,
     resizing,
@@ -114,5 +136,6 @@ export const useShapeManipulation = () => {
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
+    getHandleOffset, // ✅ Export for handle positioning
   };
 };

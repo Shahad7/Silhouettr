@@ -23,12 +23,14 @@ export type Challenge = {
   createdAt: number;
   subredditName: string;
   postId?: string;
+  screenshotUrl?: string; // URL to the rendered canvas image
 };
 
 export type CreateChallengeRequest = {
   shapes: Shape[];
   answer: string;
   postTitle: string;
+  screenshotDataUrl: string; // Base64 encoded image data
 };
 
 export type CreateChallengeResponse = {
@@ -92,6 +94,9 @@ export interface LeaderboardResponse {
   leaderboard: LeaderboardEntry[];
   userRank?: number;
   totalPlayers: number;
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
 }
 
 // Redis Key Patterns and Schemas
