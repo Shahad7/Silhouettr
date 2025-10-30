@@ -1,6 +1,6 @@
 import React from 'react';
 
-const SHAPE_PALETTE: string[] = ['●', '▲', '★', '♦', '▼', '◆', '▪'];
+const SHAPE_PALETTE: string[] = ['●', '▮', '★', '♦', '▼', '◆', '▪'];
 
 
 
@@ -27,10 +27,16 @@ export const ShapeToolbar: React.FC<ShapeToolbarProps> = ({
               <button
                 key={shapeId}
                 onClick={() => onShapeSelect(shapeId)}
-                className={`text-lg p-1 transition ${selectedShape === shapeId
-                  ? 'bg-white text-black rounded'
-                  : 'text-white hover:bg-gray-700 rounded'
+                className={`text-lg p-1 transition rounded border-2 ${selectedShape === shapeId
+                  ? 'border-blue-500 bg-blue-50' // Selected: blue border with light blue bg
+                  : 'border-gray-300 bg-gray-100 hover:bg-gray-200' // Not selected: gray border
                   }`}
+                style={{
+                  color: '#ffffff', // WHITE symbols
+                  WebkitTextFillColor: '#ffffff',
+                  textShadow: '0 0 2px rgba(0,0,0,0.8)', // Black shadow for contrast on light bg
+                  backgroundColor: selectedShape === shapeId ? '#dbeafe' : '#f3f4f6' // Ensure bg colors work
+                }}
                 title={`${shape} (White)`}
               >
                 {shape}
@@ -47,10 +53,14 @@ export const ShapeToolbar: React.FC<ShapeToolbarProps> = ({
               <button
                 key={shapeId}
                 onClick={() => onShapeSelect(shapeId)}
-                className={`text-lg p-1 transition border-2 ${selectedShape === shapeId
-                  ? 'text-black rounded border-white bg-gray-700'
-                  : 'text-black hover:bg-gray-700 hover:text-white rounded border-gray-400'
+                className={`text-lg p-1 transition rounded border-2 ${selectedShape === shapeId
+                  ? 'border-blue-500 bg-blue-50' // Selected: blue border with light blue bg
+                  : 'border-gray-300 bg-gray-100 hover:bg-gray-200' // Not selected: gray border
                   }`}
+                style={{
+                  color: '#000000', // Black symbols
+                  WebkitTextFillColor: '#000000'
+                }}
                 title={`${shape} (Black)`}
               >
                 {shape}
@@ -65,8 +75,8 @@ export const ShapeToolbar: React.FC<ShapeToolbarProps> = ({
         onClick={onAddShape}
         disabled={!selectedShape}
         className={`w-full py-1 rounded text-sm font-medium transition flex items-center justify-center gap-1 ${!selectedShape
-          ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-          : 'bg-white text-black hover:bg-gray-100 active:scale-95'
+          ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+          : 'bg-blue-600 text-white hover:bg-blue-700 active:scale-95'
           }`}
       >
         <span className="text-xs">+</span>

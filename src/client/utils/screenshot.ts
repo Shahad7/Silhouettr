@@ -5,49 +5,89 @@ import { Shape } from '../types';
  * This ensures pixel-perfect consistency across all devices
  */
 export function renderShapesToCanvas(shapes: Omit<Shape, 'id'>[]): string {
-  // Create a canvas element
-  const canvas = document.createElement('canvas');
-  canvas.width = 300;
-  canvas.height = 240;
+  try {
+    console.log('Screenshot: Looking for canvas element...');
 
-  const ctx = canvas.getContext('2d');
-  if (!ctx) {
-    throw new Error('Failed to get canvas context');
-  }
+    // Try to find the actual canvas element first
+    const canvasElement = document.querySelector('canvas') as HTMLCanvasElement;
 
-  // Set background to match the canvas background
-  ctx.fillStyle = '#9ca3af'; // gray-400
-  ctx.fillRect(0, 0, 300, 240);
-
-  // Render each shape
-  shapes.forEach((shape) => {
-    const baseSize = 240; // Same as Canvas component
-    const fontSize = (shape.sizePercent / 100) * baseSize;
-
-    // Calculate position (same logic as Canvas component)
-    const x = (shape.xPercent / 100) * 300;
-    const y = (shape.yPercent / 100) * 240;
-
-    // Set up text rendering with color support
-    ctx.fillStyle = shape.color === 'black' ? '#000000' : '#ffffff';
-    ctx.font = `${fontSize}px Arial, sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    // Apply rotation if needed
-    if (shape.rotation && shape.rotation !== 0) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate((shape.rotation * Math.PI) / 180);
-      ctx.fillText(shape.shape, 0, 0);
-      ctx.restore();
-    } else {
-      ctx.fillText(shape.shape, x, y);
+    if (canvasElement) {
+      console.log('Screenshot: Found canvas element, getting data URL...');
+      const dataUrl = canvasElement.toDataURL('image/png', 0.9);
+      console.log('Screenshot: Generated data URL from canvas, length:', dataUrl.length);
+      return dataUrl;
     }
-  });
 
-  // Return as data URL
-  return canvas.toDataURL('image/png', 0.9);
+    console.log('Screenshot: No canvas found, creating fallback...');
+
+    // Fallback: Create a canvas element (same as before)
+    const canvas = document.createElement('canvas');
+    canvas.width = 300;
+    canvas.height = 240;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      throw new Error('Failed to get canvas context');
+    }
+
+    // Set background to match the canvas background
+    ctx.fillStyle = '#f3f4f6'; // gray-100
+    ctx.fillRect(0, 0, 300, 240);
+
+    // Render each shape
+    shapes.forEach((shape, index) => {
+      try {
+        const baseSize = 240;
+        const fontSize = (shape.sizePercent / 100) * baseSize;
+        const x = (shape.xPercent / 100) * 300;
+        const y = (shape.yPercent / 100) * 240;
+
+        if (!shape.shape || typeof shape.shape !== 'string') {
+          console.warn(`Screenshot: Invalid shape at index ${index}:`, shape);
+          return;
+        }
+
+        // Set up text rendering with color support
+        ctx.fillStyle = shape.color === 'black' ? '#000000' : '#ffffff';
+        ctx.font = `${fontSize}px Arial, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Add text shadow for better visibility
+        if (shape.color === 'black') {
+          ctx.shadowColor = 'rgba(255,255,255,0.8)';
+          ctx.shadowBlur = 1;
+        } else {
+          ctx.shadowColor = 'rgba(0,0,0,0.8)';
+          ctx.shadowBlur = 2;
+        }
+
+        // Apply rotation if needed
+        if (shape.rotation && shape.rotation !== 0) {
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate((shape.rotation * Math.PI) / 180);
+          ctx.fillText(shape.shape, 0, 0);
+          ctx.restore();
+        } else {
+          ctx.fillText(shape.shape, x, y);
+        }
+
+        // Reset shadow
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+      } catch (shapeError) {
+        console.error(`Screenshot: Error rendering shape ${index}:`, shapeError);
+      }
+    });
+
+    const dataUrl = canvas.toDataURL('image/png', 0.9);
+    console.log('Screenshot: Generated fallback data URL, length:', dataUrl.length);
+    return dataUrl;
+  } catch (error) {
+    console.error('Screenshot: Fatal error during rendering:', error);
+    throw new Error(`Screenshot generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 /**

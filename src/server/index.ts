@@ -2,7 +2,7 @@ import express from 'express';
 import { ChallengeResponse, ErrorResponse, GuessSubmissionRequest, GuessSubmissionResponse, LeaderboardResponse, CreateChallengeRequest, CreateChallengeResponse, GetChallengesResponse, InitResponse } from '../shared/types/api';
 import { redis, reddit, createServer, context, getServerPort } from '@devvit/web/server';
 import { createPost } from './core/post';
-import { getChallenge, validateGuess, getUserSession, updateSession, createChallenge, getChallengesForSubreddit } from './core/challenge';
+import { getChallenge, validateGuess, getUserSession, updateSession, createChallenge, getChallengesForSubreddit, getScreenshot } from './core/challenge';
 import { leaderboardService } from './core/leaderboard';
 
 const app = express();

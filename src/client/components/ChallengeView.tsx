@@ -160,12 +160,15 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
 
       {/* Error state */}
       {state.error && (
-        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black p-4 flex items-center justify-center">
-          <div className="bg-gray-800/80 backdrop-blur-lg rounded-2xl border border-gray-700/50 p-3 w-full max-w-[360px] shadow-2xl mx-auto text-center">
-            <h2 className="text-sm font-bold text-white mb-1">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 flex items-center justify-center">
+          <div className="bg-white backdrop-blur-lg rounded-2xl border border-gray-200 p-4 w-full max-w-[360px] shadow-xl mx-auto text-center">
+            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <span className="text-xl">⚠️</span>
+            </div>
+            <h2 className="text-sm font-bold text-gray-900 mb-1">
               {state.offline ? 'Offline' : 'Error'}
             </h2>
-            <p className="text-gray-300 text-xs mb-3">
+            <p className="text-gray-600 text-xs mb-4">
               {state.offline ? 'No connection' : state.error}
             </p>
             <div className="flex gap-2 justify-center">
@@ -173,14 +176,14 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
                 <button
                   onClick={loadChallenge}
                   disabled={state.offline}
-                  className="px-3 py-1 bg-red-600 text-white rounded text-xs"
+                  className="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition-colors"
                 >
                   Retry
                 </button>
               )}
               <button
                 onClick={onBack}
-                className="px-3 py-1 bg-white text-black rounded text-xs font-bold"
+                className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-bold hover:bg-blue-700 transition-colors"
               >
                 ← Menu
               </button>
@@ -191,12 +194,15 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
 
       {/* No challenge found */}
       {!state.loading && !state.error && !state.challenge && (
-        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black p-4 flex items-center justify-center">
-          <div className="bg-gray-800/80 backdrop-blur-lg rounded-2xl border border-gray-700/50 p-3 w-full max-w-[360px] shadow-2xl mx-auto text-center">
-            <h2 className="text-sm font-bold text-white mb-1">No Challenge</h2>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 flex items-center justify-center">
+          <div className="bg-white backdrop-blur-lg rounded-2xl border border-gray-200 p-4 w-full max-w-[360px] shadow-xl mx-auto text-center">
+            <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <span className="text-xl">🔍</span>
+            </div>
+            <h2 className="text-sm font-bold text-gray-900 mb-1">No Challenge</h2>
             <button
               onClick={onBack}
-              className="px-3 py-1 bg-white text-black rounded text-xs font-bold mt-2"
+              className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-bold hover:bg-blue-700 transition-colors mt-2"
             >
               ← Menu
             </button>
@@ -206,11 +212,14 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
 
       {/* Completion state */}
       {!state.loading && !state.error && state.challenge && state.completed && state.completionData && (
-        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black p-4 flex items-center justify-center">
-          <div className="bg-gray-800/80 backdrop-blur-lg rounded-2xl border border-gray-700/50 p-3 w-full max-w-[360px] shadow-2xl mx-auto text-center">
-            <h2 className="text-base font-black text-white mb-2">SOLVED!</h2>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 flex items-center justify-center">
+          <div className="bg-white backdrop-blur-lg rounded-2xl border border-gray-200 p-4 w-full max-w-[360px] shadow-xl mx-auto text-center">
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <span className="text-2xl">🎉</span>
+            </div>
+            <h2 className="text-base font-black text-gray-900 mb-2">SOLVED!</h2>
 
-            <div className="mb-3">
+            <div className="mb-4">
               <PerformanceMetrics
                 attempts={state.completionData.attempts}
                 timeElapsed={state.completionData.timeElapsed || 0}
@@ -224,7 +233,7 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
             <div className="flex justify-center">
               <button
                 onClick={onBack}
-                className="px-6 py-2 bg-white text-black rounded text-xs font-bold"
+                className="px-6 py-2 bg-blue-600 text-white rounded text-xs font-bold hover:bg-blue-700 transition-colors"
               >
                 ← Menu
               </button>
@@ -233,33 +242,33 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
         </div>
       )}
 
-      {/* Main challenge view - PERFECTO WITHOUT TITLE */}
+      {/* Main challenge view - LIGHT THEME */}
       {!state.loading && !state.error && state.challenge && !state.completed && (
-        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black flex flex-col">
-          {/* Header - CLEAN & BALANCED */}
-          <div className="bg-gray-800 border-b border-gray-700 p-2">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
+          {/* Header - LIGHT THEME */}
+          <div className="bg-white border-b border-gray-200 p-2">
             <div className="flex items-center justify-between max-w-[360px] mx-auto w-full gap-3">
               {/* PROMINENT Back Button */}
               <button
                 onClick={onBack}
-                className="text-black text-xs font-bold bg-white px-3 py-1 rounded hover:bg-gray-100 transition-colors flex items-center gap-1"
+                className="text-white text-xs font-bold bg-blue-600 px-3 py-1 rounded hover:bg-blue-700 transition-colors flex items-center gap-1"
               >
                 ← Menu
               </button>
 
               {/* Timer & Attempts - CENTER STAGE */}
-              <div className="flex items-center gap-3 bg-gray-700 px-3 py-1 rounded border border-gray-600">
+              <div className="flex items-center gap-3 bg-gray-100 px-3 py-1 rounded border border-gray-300">
                 <Timer
                   {...(state.session?.startTime && { startTime: state.session.startTime })}
                   isRunning={!state.completed && !!state.session && !state.offline && !state.session?.completed}
                 />
-                <div className="w-px h-4 bg-gray-600"></div>
+                <div className="w-px h-4 bg-gray-300"></div>
                 <AttemptCounter attempts={state.session?.attempts || 0} />
               </div>
 
               {/* Offline Indicator - ONLY IF NEEDED */}
               {state.offline && (
-                <div className="text-red-400 text-xs bg-red-400/10 px-2 py-1 rounded border border-red-400/20">
+                <div className="text-red-600 text-xs bg-red-100 px-2 py-1 rounded border border-red-200">
                   Offline
                 </div>
               )}
@@ -267,7 +276,7 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
           </div>
 
           {/* Canvas - MAXIMUM SPACE */}
-          <div className="flex-1 flex items-center justify-center p-3 bg-gray-900 min-h-0">
+          <div className="flex-1 flex items-center justify-center p-3 bg-gray-100 min-h-0">
             <Canvas
               shapes={state.challenge.shapes}
               isPlayMode={true}
@@ -275,13 +284,13 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
             />
           </div>
 
-          {/* Input - PERFECT POSITION */}
-          <div className="bg-gray-800 border-t border-gray-700 p-3">
+          {/* Input - LIGHT THEME */}
+          <div className="bg-white border-t border-gray-200 p-3">
             <div className="max-w-[360px] mx-auto w-full">
               <form onSubmit={handleGuessSubmit}>
                 {state.inlineError && !state.loading && (
-                  <div className="p-2 bg-red-500/10 border border-red-500/30 rounded text-center mb-2">
-                    <p className="text-xs text-red-400 mb-2">{state.inlineError}</p>
+                  <div className="p-2 bg-red-50 border border-red-200 rounded text-center mb-2">
+                    <p className="text-xs text-red-700 mb-2">{state.inlineError}</p>
                     {!state.offline && !state.inlineError.toLowerCase().includes('you already submitted') && (
                       <button
                         onClick={() => setState(prev => ({ ...prev, inlineError: null }))}
@@ -299,13 +308,13 @@ export const ChallengeView: React.FC<ChallengeViewProps> = ({ postId, onBack }) 
                     onChange={(e) => setState(prev => ({ ...prev, guess: e.target.value }))}
                     placeholder={state.session?.completed ? "Already completed" : "What's in the silhouette?"}
                     maxLength={50}
-                    className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm focus:outline-none focus:border-white disabled:bg-gray-600 placeholder-gray-400"
+                    className="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded text-gray-900 text-sm focus:outline-none focus:border-blue-500 disabled:bg-gray-200 placeholder-gray-500"
                     disabled={state.submitting || state.offline || state.session?.completed}
                   />
                   <button
                     type="submit"
                     disabled={!state.guess.trim() || state.submitting || state.offline || state.session?.completed}
-                    className="px-4 py-2 bg-white text-black rounded text-sm font-bold disabled:bg-gray-600 disabled:text-gray-400 hover:bg-gray-100 transition-colors"
+                    className="px-4 py-2 bg-blue-600 text-white rounded text-sm font-bold disabled:bg-gray-400 disabled:text-gray-600 hover:bg-blue-700 transition-colors"
                   >
                     Guess
                   </button>

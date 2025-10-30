@@ -8,5 +8,5 @@ export { CompactTimer } from './CompactTimer';
 export { AttemptCounter } from './AttemptCounter';
 export { PerformanceMetrics } from './PerformanceMetrics';
 export { Leaderboard } from './Leaderboard';
-export { CompactLeaderboard } from './CompactLeaderboard';
-export { LoadingSpinner, FullscreenLoader, CompactLoader, InlineLoader } from './LoadingSpinner';
+
+export { LoadingSpinner, FullscreenLoader, InlineLoader } from './LoadingSpinner';

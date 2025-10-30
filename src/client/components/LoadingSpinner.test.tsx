@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { LoadingSpinner, FullscreenLoader, CompactLoader, InlineLoader } from './LoadingSpinner';
+import { LoadingSpinner, FullscreenLoader, InlineLoader } from './LoadingSpinner';
 
 describe('LoadingSpinner', () => {
     it('should render inline variant by default', () => {
@@ -48,12 +48,7 @@ describe('Convenience Components', () => {
         expect(document.querySelector('.min-h-screen')).toBeInTheDocument();
     });
 
-    it('should render CompactLoader', () => {
-        render(<CompactLoader message="Loading data..." />);
 
-        expect(screen.getByText('Loading data...')).toBeInTheDocument();
-        expect(document.querySelector('.py-4')).toBeInTheDocument();
-    });
 
     it('should render InlineLoader', () => {
         render(<InlineLoader message="Loading content..." />);

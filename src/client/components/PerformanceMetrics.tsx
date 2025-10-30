@@ -22,22 +22,22 @@ export const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({
   };
 
   return (
-    <div className={`bg-gray-800 border border-gray-700 rounded p-2 ${className}`}>
-      <div className="grid grid-cols-2 gap-2 text-center">
+    <div className={`bg-white border border-gray-200 rounded-lg p-3 ${className}`}>
+      <div className="grid grid-cols-2 gap-3 text-center">
         <div>
-          <div className="text-sm font-black text-white">{attempts}</div>
-          <div className="text-xs text-gray-400">Attempts</div>
+          <div className="text-sm font-black text-gray-900">{attempts}</div>
+          <div className="text-xs text-gray-600">Attempts</div>
         </div>
         <div>
-          <div className="text-sm font-black text-white font-mono">
+          <div className="text-sm font-black text-gray-900 font-mono">
             {formatTime(timeElapsed)}
           </div>
-          <div className="text-xs text-gray-400">Time</div>
+          <div className="text-xs text-gray-600">Time</div>
         </div>
       </div>
       {completed && leaderboardPosition && (
-        <div className="mt-1 text-center">
-          <span className="text-xs text-yellow-400 font-bold">
+        <div className="mt-2 text-center">
+          <span className="text-xs text-blue-600 font-bold">
             Rank #{leaderboardPosition}
           </span>
         </div>

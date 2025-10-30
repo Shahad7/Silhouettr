@@ -123,15 +123,15 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
 
       {/* Error state */}
       {state.error && (
-        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black p-4 flex items-center justify-center">
-          <div className="bg-gray-800/80 backdrop-blur-lg rounded-2xl border border-gray-700/50 p-6 w-full max-w-[360px] shadow-2xl mx-auto text-center">
-            <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 flex items-center justify-center">
+          <div className="bg-white backdrop-blur-lg rounded-2xl border border-gray-200 p-6 w-full max-w-[360px] shadow-xl mx-auto text-center">
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl">⚠️</span>
             </div>
-            <h2 className="text-lg font-bold text-white mb-2">
+            <h2 className="text-lg font-bold text-gray-900 mb-2">
               {state.offline ? 'Offline' : 'Error'}
             </h2>
-            <p className="text-gray-300 text-sm mb-6">
+            <p className="text-gray-600 text-sm mb-6">
               {state.offline
                 ? 'You are currently offline. Please check your internet connection.'
                 : state.error
@@ -142,14 +142,14 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                 <button
                   onClick={() => loadLeaderboard(1)}
                   disabled={state.offline}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium"
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium"
                 >
                   {state.offline ? 'Waiting...' : 'Retry'}
                 </button>
               )}
               <button
                 onClick={onBack}
-                className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-200 text-sm font-medium border border-gray-600"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 text-sm font-medium"
               >
                 Back
               </button>
@@ -160,24 +160,23 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
 
       {/* Main leaderboard view */}
       {!state.loading && !state.error && (
-        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black flex flex-col">
-          {/* Header - FIXED */}
-          <div className="bg-gray-800 border-b border-gray-700 p-4">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
+          {/* Header - LIGHT THEME */}
+          <div className="bg-white border-b border-gray-200 p-4">
             <div className="flex items-center justify-between max-w-[360px] mx-auto w-full">
               <button
                 onClick={onBack}
-                className="text-gray-300 hover:text-white font-medium text-sm transition-colors flex items-center gap-1"
+                className="text-gray-600 hover:text-gray-900 font-medium text-sm transition-colors flex items-center gap-1"
               >
                 ← Back
               </button>
               <div className="text-center flex-1 mx-3">
-                {/* FIXED TITLE - Smaller and better aligned */}
-                <h1 className="text-base font-bold text-white mb-1">LEADERBOARD</h1>
-                <p className="text-xs text-gray-400">
+                <h1 className="text-base font-bold text-gray-900 mb-1">LEADERBOARD</h1>
+                <p className="text-xs text-gray-600">
                   {state.totalPlayers} player{state.totalPlayers !== 1 ? 's' : ''}
                 </p>
                 {state.offline && (
-                  <span className="text-xs text-red-400 bg-red-400/10 px-2 py-1 rounded-full mt-1 inline-block">
+                  <span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded-full mt-1 inline-block">
                     Offline
                   </span>
                 )}
@@ -186,21 +185,20 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                 <button
                   onClick={() => loadLeaderboard(state.currentPage)}
                   disabled={state.offline}
-                  className="text-gray-400 hover:text-white text-sm disabled:text-gray-600 transition-colors p-2 hover:bg-gray-700 rounded-lg"
+                  className="text-gray-500 hover:text-gray-700 text-sm disabled:text-gray-400 transition-colors p-2 hover:bg-gray-100 rounded-lg"
                   title="Refresh leaderboard"
                 >
                   🔄
                 </button>
-                {/* PLAY BUTTON REMOVED */}
               </div>
             </div>
           </div>
 
           {/* Current User Rank (if not in top entries) */}
           {state.userRank && state.userRank > 10 && currentUsername && (
-            <div className="bg-blue-500/10 border-b border-gray-700 p-3">
+            <div className="bg-blue-50 border-b border-gray-200 p-3">
               <div className="max-w-[360px] mx-auto w-full">
-                <div className="text-sm text-blue-400 font-medium text-center flex items-center justify-center gap-2">
+                <div className="text-sm text-blue-700 font-medium text-center flex items-center justify-center gap-2">
                   <span>🎯</span>
                   Your rank: #{state.userRank}
                 </div>
@@ -212,13 +210,13 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
           <div className="flex-1 overflow-y-auto">
             <div className="max-w-[360px] mx-auto w-full p-4">
               {state.leaderboard.length === 0 ? (
-                <div className="flex items-center justify-center h-48 text-gray-400">
+                <div className="flex items-center justify-center h-48 text-gray-500">
                   <div className="text-center">
-                    <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
                       <span className="text-2xl">🏆</span>
                     </div>
-                    <p className="text-base font-medium mb-1">No completions yet!</p>
-                    <p className="text-sm">Be the first to solve this challenge.</p>
+                    <p className="text-base font-medium mb-1 text-gray-700">No completions yet!</p>
+                    <p className="text-sm text-gray-600">Be the first to solve this challenge.</p>
                   </div>
                 </div>
               ) : (
@@ -227,33 +225,33 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                     <div
                       key={`${entry.username}-${entry.completedAt}`}
                       className={`p-4 rounded-xl border transition-all duration-200 ${isCurrentUser(entry.username)
-                        ? 'bg-blue-500/10 border-blue-500/30 shadow-lg'
-                        : 'bg-gray-800/50 border-gray-700 hover:bg-gray-700/50'
+                        ? 'bg-blue-50 border-blue-200 shadow-sm'
+                        : 'bg-white border-gray-200 hover:bg-gray-50'
                         }`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           {/* Rank */}
-                          <div className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${entry.rank === 1 ? 'bg-yellow-500/20 text-yellow-400' :
-                            entry.rank === 2 ? 'bg-gray-400/20 text-gray-300' :
-                              entry.rank === 3 ? 'bg-orange-500/20 text-orange-400' :
-                                'bg-gray-700 text-gray-400'
+                          <div className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${entry.rank === 1 ? 'bg-yellow-100 text-yellow-700' :
+                            entry.rank === 2 ? 'bg-gray-100 text-gray-700' :
+                              entry.rank === 3 ? 'bg-orange-100 text-orange-700' :
+                                'bg-gray-100 text-gray-600'
                             }`}>
                             {entry.rank}
                           </div>
 
                           {/* Username */}
                           <div>
-                            <div className={`font-medium text-sm ${isCurrentUser(entry.username) ? 'text-blue-400' : 'text-white'
+                            <div className={`font-medium text-sm ${isCurrentUser(entry.username) ? 'text-blue-700' : 'text-gray-900'
                               }`}>
                               {entry.username}
                               {isCurrentUser(entry.username) && (
-                                <span className="ml-2 text-xs text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded-full">
+                                <span className="ml-2 text-xs text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
                                   You
                                 </span>
                               )}
                             </div>
-                            <div className="text-xs text-gray-400">
+                            <div className="text-xs text-gray-500">
                               {formatDate(entry.completedAt)}
                             </div>
                           </div>
@@ -261,10 +259,10 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
 
                         {/* Stats */}
                         <div className="text-right">
-                          <div className="font-mono text-sm font-bold text-white">
+                          <div className="font-mono text-sm font-bold text-gray-900">
                             {formatTime(entry.completionTime)}
                           </div>
-                          <div className="text-xs text-gray-400">
+                          <div className="text-xs text-gray-600">
                             {entry.attempts} attempt{entry.attempts !== 1 ? 's' : ''}
                           </div>
                         </div>
@@ -278,20 +276,20 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
 
           {/* PAGINATION BUTTONS */}
           {state.totalPages > 1 && (
-            <div className="bg-gray-800 border-t border-gray-700 p-3">
+            <div className="bg-white border-t border-gray-200 p-3">
               <div className="max-w-[360px] mx-auto w-full">
                 <div className="flex justify-between items-center gap-2">
                   {/* Previous Button */}
                   <button
                     onClick={handlePreviousPage}
                     disabled={state.currentPage <= 1}
-                    className="px-4 py-2 bg-gray-700 text-white rounded text-sm font-medium border border-gray-600 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded text-sm font-medium border border-gray-300 hover:bg-gray-200 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
                   >
                     ← Previous
                   </button>
 
                   {/* Page Info */}
-                  <div className="text-xs text-gray-400 text-center">
+                  <div className="text-xs text-gray-600 text-center">
                     Page {state.currentPage} of {state.totalPages}
                   </div>
 
@@ -299,7 +297,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                   <button
                     onClick={handleNextPage}
                     disabled={state.currentPage >= state.totalPages}
-                    className="px-4 py-2 bg-gray-700 text-white rounded text-sm font-medium border border-gray-600 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded text-sm font-medium border border-gray-300 hover:bg-gray-200 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
                   >
                     Next →
                   </button>
@@ -309,9 +307,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
           )}
 
           {/* Footer */}
-          <div className="bg-gray-800 border-t border-gray-700 p-3">
+          <div className="bg-white border-t border-gray-200 p-3">
             <div className="max-w-[360px] mx-auto w-full">
-              <div className="flex items-center justify-between text-xs text-gray-400">
+              <div className="flex items-center justify-between text-xs text-gray-500">
                 <span>Updated: {new Date(state.lastUpdated).toLocaleTimeString()}</span>
                 <span>Ranked by time + attempts</span>
               </div>

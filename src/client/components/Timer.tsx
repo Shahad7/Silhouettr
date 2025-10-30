@@ -62,13 +62,13 @@ export const Timer: React.FC<TimerProps> = ({
 
   return (
     <div className={`flex items-center gap-1 ${className}`}>
-      <span className="text-xs text-gray-300">⏱️</span>
-      <span className="font-mono text-xs font-bold text-white">
+      <span className="text-xs text-gray-600">⏱️</span>
+      <span className="font-mono text-xs font-bold text-gray-900">
         {formatTime(elapsedTime)}
       </span>
     </div>
   );
-  
+
 };
 
 
