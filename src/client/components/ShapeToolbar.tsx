@@ -2,13 +2,7 @@ import React from 'react';
 
 const SHAPE_PALETTE: string[] = ['●', '▲', '★', '♦', '▼', '◆', '▪'];
 
-// Create shape variants with color information
-const SHAPE_VARIANTS = [
-  // First row - White symbols
-  ...SHAPE_PALETTE.map(shape => ({ shape, color: 'white', id: `${shape}-white` })),
-  // Second row - Black symbols  
-  ...SHAPE_PALETTE.map(shape => ({ shape, color: 'black', id: `${shape}-black` }))
-];
+
 
 interface ShapeToolbarProps {
   selectedShape: string;
@@ -53,9 +47,9 @@ export const ShapeToolbar: React.FC<ShapeToolbarProps> = ({
               <button
                 key={shapeId}
                 onClick={() => onShapeSelect(shapeId)}
-                className={`text-lg p-1 transition border ${selectedShape === shapeId
-                  ? 'bg-white text-black rounded border-white'
-                  : 'text-black bg-white hover:bg-gray-200 rounded border-gray-300'
+                className={`text-lg p-1 transition border-2 ${selectedShape === shapeId
+                  ? 'text-black rounded border-white bg-gray-700'
+                  : 'text-black hover:bg-gray-700 hover:text-white rounded border-gray-400'
                   }`}
                 title={`${shape} (Black)`}
               >

@@ -86,7 +86,7 @@ export const Canvas: React.FC<CanvasProps> = ({
         onMouseMove(mouseEvent as any);
       } : undefined}
       onTouchEnd={!isPlayMode ? onMouseUp : undefined}
-      className="relative bg-gray-900 border-2 border-gray-700 rounded-xl overflow-visible touch-manipulation mx-auto"
+      className="relative bg-gray-400 border-2 border-gray-600 rounded-xl overflow-visible touch-manipulation mx-auto"
       style={{
         width: '300px',  // FIXED WIDTH - exactly the same everywhere, fits all mobile devices
         height: '240px', // FIXED HEIGHT - exactly the same everywhere (300 * 4/5 = 240)
@@ -275,7 +275,7 @@ export const Canvas: React.FC<CanvasProps> = ({
         );
       })}
       {shapes.length === 0 && !isPlayMode && (
-        <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-base pointer-events-none bg-gray-900/50 rounded-xl">
+        <div className="absolute inset-0 flex items-center justify-center text-gray-700 text-base pointer-events-none bg-gray-400/50 rounded-xl">
           <div className="text-center">
             <p className="font-medium">Add symbols to start creating</p>
           </div>

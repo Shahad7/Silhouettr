@@ -16,7 +16,7 @@ export function renderShapesToCanvas(shapes: Omit<Shape, 'id'>[]): string {
   }
 
   // Set background to match the canvas background
-  ctx.fillStyle = '#111827'; // gray-900
+  ctx.fillStyle = '#9ca3af'; // gray-400
   ctx.fillRect(0, 0, 300, 240);
 
   // Render each shape
