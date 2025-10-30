@@ -2,6 +2,14 @@ import React from 'react';
 
 const SHAPE_PALETTE: string[] = ['●', '▲', '★', '♦', '▼', '◆', '▪'];
 
+// Create shape variants with color information
+const SHAPE_VARIANTS = [
+  // First row - White symbols
+  ...SHAPE_PALETTE.map(shape => ({ shape, color: 'white', id: `${shape}-white` })),
+  // Second row - Black symbols  
+  ...SHAPE_PALETTE.map(shape => ({ shape, color: 'black', id: `${shape}-black` }))
+];
+
 interface ShapeToolbarProps {
   selectedShape: string;
   onShapeSelect: (shape: string) => void;
@@ -15,21 +23,47 @@ export const ShapeToolbar: React.FC<ShapeToolbarProps> = ({
 }) => {
   return (
     <div className="mb-3 flex-shrink-0">
-      {/* Shape Grid - Ultra Compact */}
-      <div className="grid grid-cols-6 gap-1 mb-2">
-        {SHAPE_PALETTE.map((shape) => (
-          <button
-            key={shape}
-            onClick={() => onShapeSelect(shape)}
-            className={`text-lg p-1 transition ${selectedShape === shape
-              ? 'bg-white text-black rounded'
-              : 'text-white hover:bg-gray-700 rounded'
-              }`}
-            title={shape}
-          >
-            {shape}
-          </button>
-        ))}
+      {/* Shape Grid - Two Rows: White and Black */}
+      <div className="space-y-1 mb-2">
+        {/* First Row - White Symbols */}
+        <div className="grid grid-cols-7 gap-1">
+          {SHAPE_PALETTE.map((shape) => {
+            const shapeId = `${shape}-white`;
+            return (
+              <button
+                key={shapeId}
+                onClick={() => onShapeSelect(shapeId)}
+                className={`text-lg p-1 transition ${selectedShape === shapeId
+                  ? 'bg-white text-black rounded'
+                  : 'text-white hover:bg-gray-700 rounded'
+                  }`}
+                title={`${shape} (White)`}
+              >
+                {shape}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Second Row - Black Symbols */}
+        <div className="grid grid-cols-7 gap-1">
+          {SHAPE_PALETTE.map((shape) => {
+            const shapeId = `${shape}-black`;
+            return (
+              <button
+                key={shapeId}
+                onClick={() => onShapeSelect(shapeId)}
+                className={`text-lg p-1 transition border ${selectedShape === shapeId
+                  ? 'bg-white text-black rounded border-white'
+                  : 'text-black bg-white hover:bg-gray-200 rounded border-gray-300'
+                  }`}
+                title={`${shape} (Black)`}
+              >
+                {shape}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Add Button - Super Compact */}

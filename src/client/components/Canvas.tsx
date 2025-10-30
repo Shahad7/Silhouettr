@@ -147,10 +147,9 @@ export const Canvas: React.FC<CanvasProps> = ({
               style={{
                 fontSize: fontSize,
                 lineHeight: 1,
-                color: '#ffffff', // White for better contrast on dark background
-                WebkitTextFillColor: '#ffffff',
-                textShadow: '0 0 1px rgba(0,0,0,0.5)',
-                filter: 'grayscale(100%) brightness(100%)', // White symbols on dark background
+                color: shape.color === 'black' ? '#000000' : '#ffffff',
+                WebkitTextFillColor: shape.color === 'black' ? '#000000' : '#ffffff',
+                textShadow: shape.color === 'black' ? '0 0 1px rgba(255,255,255,0.5)' : '0 0 1px rgba(0,0,0,0.5)',
                 fontFamily: 'Arial, sans-serif',
                 transform: `rotate(${shape.rotation || 0}deg)`,
                 transition:
@@ -166,16 +165,9 @@ export const Canvas: React.FC<CanvasProps> = ({
               {shape.shape}
             </div>
             {!isPlayMode && hasId && (() => {
-              // Smart button positioning - close to edges but prevents collision on small symbols
-              const baseSize = 240; // Canvas height reference
-              const actualSymbolSize = (shape.sizePercent / 100) * baseSize; // Real pixel size
-              const symbolRadius = actualSymbolSize / 2; // Half the symbol size
-
-              // For small symbols: ensure minimum distance to prevent button collision
-              // For large symbols: stay close to symbol edge
-              const minOffset = 22; // Minimum distance to prevent button collision
-              const edgeOffset = symbolRadius + 8; // 8px outside symbol edge
-              const buttonOffset = Math.max(minOffset, edgeOffset);
+              // EXTREMELY CLOSE button positioning - fixed small distance regardless of symbol size
+              // Only use slightly more distance for very tiny symbols to prevent overlap
+              const buttonOffset = shape.sizePercent < 5 ? 12 : 8;
               const buttonSize = 18; // Fixed button size
 
               return (

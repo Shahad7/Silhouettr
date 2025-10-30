@@ -11,12 +11,12 @@ export const createPost = async () => {
   const post = await reddit.submitCustomPost({
     splash: {
       // Splash Screen Configuration
-      appDisplayName: 'Shape Challenge',
-      backgroundUri: 'default-splash.png',
+      appDisplayName: 'Silhouettr',
+      backgroundUri: 'shape-challenge-splash.png',
       buttonLabel: 'Play Challenge',
-      description: 'Can you solve this shape challenge?',
-      heading: '🎯 Welcome to Shape Guess Challenge!',
-      appIconUri: 'default-icon.png',
+      description: 'Can you guess what this picture represents?',
+      heading: '🎯 Welcome to Silhouettr!',
+      appIconUri: 'shape-challenge-logo.png',
     },
     postData: {
       gameType: 'challenge',

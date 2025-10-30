@@ -8,6 +8,7 @@ export type InitResponse = {
 // Shape Challenge Types
 export type Shape = {
   shape: string;
+  color: 'white' | 'black';
   xPercent: number;
   yPercent: number;
   sizePercent: number;

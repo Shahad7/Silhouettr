@@ -28,8 +28,8 @@ export function renderShapesToCanvas(shapes: Omit<Shape, 'id'>[]): string {
     const x = (shape.xPercent / 100) * 300;
     const y = (shape.yPercent / 100) * 240;
 
-    // Set up text rendering
-    ctx.fillStyle = '#ffffff'; // White text
+    // Set up text rendering with color support
+    ctx.fillStyle = shape.color === 'black' ? '#000000' : '#ffffff';
     ctx.font = `${fontSize}px Arial, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

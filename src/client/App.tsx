@@ -21,7 +21,7 @@ function App() {
   // Session state is managed within ChallengeView component
 
   // Challenge creation state
-  const [selectedShape, setSelectedShape] = useState<string>(SHAPE_PALETTE[0]!);
+  const [selectedShape, setSelectedShape] = useState<string>(`${SHAPE_PALETTE[0]!}-white`);
   const [shapes, setShapes] = useState<Shape[]>([]); // Array of {id, shape, xPercent, yPercent, sizePercent, rotation}
   const [answer, setAnswer] = useState<string>('');
   const [postTitle, setPostTitle] = useState<string>('');
@@ -69,9 +69,13 @@ function App() {
   // ========== CREATE CHALLENGE FUNCTIONS ==========
 
   const addShape = (): void => {
+    // Parse the selected shape format: "shape-color" (e.g., "●-white" or "●-black")
+    const [shapeSymbol, color] = selectedShape.split('-') as [string, 'white' | 'black'];
+
     const newShape: Shape = {
       id: generateId(),
-      shape: selectedShape,
+      shape: shapeSymbol,
+      color: color || 'white', // Default to white if no color specified
       xPercent: 40 + Math.random() * 20, // 40-60% of width
       yPercent: 37.5 + Math.random() * 25, // 37.5-62.5% of height
       sizePercent: 10, // Default size

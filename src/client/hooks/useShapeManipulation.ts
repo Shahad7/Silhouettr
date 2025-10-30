@@ -73,8 +73,8 @@ export const useShapeManipulation = () => {
       // ✅ Natural corner scaling: pick dominant axis
       const delta = Math.max(deltaX, deltaY);
 
-      // ✅ Same sensitivity as before but now consistent & proportional
-      const newSize = Math.max(2, (offset.initialSize || 10) + delta * 0.1);
+      // ✅ High sensitivity for fast, responsive resizing (doubled sensitivity)
+      const newSize = Math.max(2, (offset.initialSize || 10) + delta * 0.6);
 
       setShapes((prevShapes) =>
         prevShapes.map((s) => (s.id === resizing ? { ...s, sizePercent: newSize } : s))
@@ -124,8 +124,9 @@ export const useShapeManipulation = () => {
 
   // ✅ Helper to get handle offset based on current shape size
   const getHandleOffset = (sizePercent: number): number => {
-    // Scale handle distance with shape size (adjust multiplier as needed)
-    return sizePercent * 0.5;
+    // Keep buttons extremely close - fixed small distance regardless of symbol size
+    // Only use slightly more distance for very tiny symbols to prevent overlap
+    return sizePercent < 5 ? 12 : 8;
   };
 
   return {

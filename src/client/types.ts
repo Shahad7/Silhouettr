@@ -2,6 +2,7 @@
 export interface Shape {
   id: string;
   shape: string;
+  color: 'white' | 'black';
   xPercent: number;
   yPercent: number;
   sizePercent: number;
